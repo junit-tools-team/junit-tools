@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.junit-tools.org/tml/tml.xsd"
+  xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tml="http://www.junit-tools.org/tml/tml.xsd">
+  <element name="test">
+    <complexType>
+    	<sequence minOccurs="1" maxOccurs="1">
+    		<element name="settings" type="tml:Settings"></element>
+    		<element name="testBases" type="tml:TestBases"></element>
+    		<element name="method" type="tml:Method" minOccurs="1"
+    			maxOccurs="unbounded">
+    		</element>
+    	</sequence>
+    	<attribute name="testBase" type="string"></attribute>
+    	<attribute name="testClass" type="string"></attribute>
+    	<attribute name="testPrio" type="tml:Testprio"></attribute>
+    	<attribute name="version" type="string"></attribute>
+    	<attribute name="superClass" type="string"></attribute>
+    	<attribute name="superClassPackage" type="string"></attribute>
+    </complexType>
+  </element>
+
+  <complexType name="TestBases">
+    <sequence maxOccurs="unbounded" minOccurs="0">
+      <element name="constructor" type="tml:Constructor"
+        minOccurs="0" maxOccurs="unbounded"></element>
+    </sequence>
+  </complexType>
+
+  <complexType name="Constructor">
+    <sequence>
+      <element name="param" type="tml:Param" maxOccurs="unbounded"
+        minOccurs="0">
+      </element>
+      <element name="testBase" type="tml:TestBase" maxOccurs="unbounded"
+        minOccurs="1"></element>
+    </sequence>
+  </complexType>
+
+  <complexType name="Param">
+  	<attribute name="name" type="string"></attribute>
+  	<attribute name="type" type="string"></attribute>
+  	<attribute name="primitive" type="boolean"></attribute>
+  </complexType>
+
+  <simpleType name="Testprio">
+    <restriction base="string">
+      <enumeration value="high"></enumeration>
+      <enumeration value="default"></enumeration>
+      <enumeration value="low"></enumeration>
+    </restriction>
+  </simpleType>
+
+  <complexType name="Method">
+  	<sequence>
+  		<element name="param" type="tml:Param" minOccurs="0"
+  			maxOccurs="unbounded">
+  		</element>
+  		<element name="paramsDefault" type="tml:ParamAssignment"
+  			minOccurs="0" maxOccurs="unbounded">
+  		</element>
+  		<element name="preconditions" type="tml:Precondition"
+  			minOccurs="0" maxOccurs="unbounded">
+  		</element>
+  		<element name="testCase" type="tml:TestCase" minOccurs="0"
+  			maxOccurs="unbounded">
+  		</element>
+  		<element name="result" type="tml:Result"></element>
+  		<element name="assertion" type="tml:Assertion" minOccurs="0"
+  			maxOccurs="unbounded">
+  		</element>
+  	</sequence>
+  	<attribute name="name" type="string"></attribute>
+  	<attribute name="modifier" type="string"></attribute>
+  	<attribute name="static" type="boolean"></attribute>
+  	<attribute name="signature" type="string"></attribute>
+  </complexType>
+
+  <complexType name="Result">
+    <sequence>
+      <element name="value" type="string"></element>
+    </sequence>
+    <attribute name="name" type="string"></attribute>
+    <attribute name="type" type="string"></attribute>
+  </complexType>
+
+  <complexType name="TestCase">
+    <sequence>
+    	<element name="paramAssignments" type="tml:ParamAssignment"
+    		minOccurs="0" maxOccurs="unbounded">
+    	</element>
+            <element name="preconditions" type="tml:Precondition" minOccurs="0" maxOccurs="unbounded"></element>
+            <element name="assertion" type="tml:Assertion" minOccurs="0"
+    		maxOccurs="unbounded">
+    	</element>
+    </sequence>
+    <attribute name="name" type="string"></attribute>
+    <attribute name="testBase" type="string"></attribute>
+  </complexType>
+
+  <complexType name="Assertion">
+    <sequence>
+      <element name="value" type="string"></element>
+      <element name="message" type="string"></element>
+    </sequence>
+    <attribute name="base" type="string"></attribute>
+    <attribute name="baseType" type="string"></attribute>
+    <attribute name="type" type="tml:AssertionType"></attribute>
+  </complexType>
+
+  <complexType name="TestBase">
+    <sequence>
+      <element name="paramValue" type="string" maxOccurs="unbounded"
+        minOccurs="0">
+      </element>
+      <element name="mocks" type="tml:Mocks" minOccurs="0"
+        maxOccurs="1"></element>
+    </sequence>
+    <attribute name="name" type="string"></attribute>
+  </complexType>
+
+  <complexType name="Mocks">
+    <sequence>
+      <element name="method" type="tml:Method" minOccurs="0"
+        maxOccurs="unbounded"></element>
+    </sequence>
+  </complexType>
+
+  <simpleType name="AssertionType">
+    <restriction base="string">
+      <enumeration value="IS_NULL"></enumeration>
+      <enumeration value="NOT_NULL"></enumeration>
+      <enumeration value="EQUALS"></enumeration>
+      <enumeration value="NOT_EQUALS"></enumeration>
+      <enumeration value="IS_TRUE"></enumeration>
+      <enumeration value="IS_FALSE"></enumeration>
+      <enumeration value="CREATER_THAN"></enumeration>
+      <enumeration value="LOWER_THAN"></enumeration>
+    </restriction>
+  </simpleType>
+
+  <complexType name="Settings">
+    <sequence>
+      <element name="setUp" type="boolean"></element>
+      <element name="setUpBeforeClass" type="boolean"></element>
+      <element name="tearDown" type="boolean"></element>
+      <element name="tearDownBeforeClass" type="boolean"></element>
+      <element name="logger" type="boolean"></element>
+      <element name="failAssertions" type="boolean"></element>
+      <element name="testsuites" type="boolean"></element>
+    </sequence>
+  </complexType>
+
+  <complexType name="ParamAssignment">
+  	<attribute name="paramName" type="string"></attribute>
+  	<attribute name="assignment" type="string"></attribute>
+  </complexType>
+
+  <complexType name="Precondition">
+  	<sequence>
+  		<element name="condition" type="string" minOccurs="1" maxOccurs="unbounded"></element>
+  	</sequence>
+  	<attribute name="comment" type="string"></attribute>
+  </complexType>
+</schema>

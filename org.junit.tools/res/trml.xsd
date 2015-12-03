@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.junit-tools.org/ntrml/ntrml.xsd"
+  xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ntrml="http://www.junit-tools.org/ntrml/ntrml.xsd">
+
+  <element name="RepProject">
+    <complexType>
+    	<sequence>
+    		<element name="statistics" type="ntrml:Statistics"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
+    		<element name="newMethods" type="ntrml:NewMethods" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="packages" type="ntrml:RepPackage"
+    			minOccurs="1" maxOccurs="unbounded">
+    		</element>
+    	</sequence>
+    	<attribute name="id" type="string"></attribute>
+    </complexType>
+  </element>
+
+  <complexType name="RepPackage">
+    <sequence>
+    		<element name="classes" type="ntrml:RepClass" minOccurs="1"
+    			maxOccurs="unbounded"></element>
+    </sequence>
+    <attribute name="id" type="string"></attribute>
+  </complexType>  
+  
+  <complexType name="RepClass">
+    <sequence>
+    		<element name="methods" type="ntrml:RepMethod" minOccurs="1"
+    			maxOccurs="unbounded"></element>
+    </sequence>
+    <attribute name="id" type="string"></attribute>
+  </complexType>  
+  
+  <complexType name="RepMethod">
+  	<sequence>
+  		<element name="report" type="ntrml:Report" minOccurs="1"
+  			maxOccurs="1">
+  		</element>
+  	</sequence>
+  	<attribute name="id" type="string"></attribute>
+  	<attribute name="signature" type="string"></attribute>
+  	<attribute name="subtype" type="string"></attribute>
+  </complexType>
+
+  <complexType name="Report">
+    <sequence>
+    	<element name="id" type="string" />
+    	<element name="isTestAvailable" type="boolean"></element>
+    	<element name="isTestNecessary" type="boolean"></element>
+    	<element name="coveredWith" type="string"></element>
+    	<element name="date" type="date"></element>
+    	<element name="testPrio" type="string"></element>
+    	<element name="isNew" type="boolean"></element>
+    	<element name="onlyNullchecks" type="boolean"></element>
+    	<element name="numberOfIfStatements" type="int"></element>
+    	<element name="checkAgain" type="boolean"></element>
+    </sequence>
+  </complexType>
+  
+  <complexType name="Statistics">
+    <sequence>
+    	<element name="necessaryTestClassesCounter" type="int" />
+    	<element name="availableTestClassesCounter" type="int" />
+    	<element name="necessaryTestMethodsCounter" type="int" />
+    	<element name="availableTestMethodsCounter" type="int" />
+    	<element name="classCoverage" type="double" />
+    	<element name="methodCoverage" type="double" />
+    	<element name="newMethodsCounter" type="int"></element>
+    </sequence>
+  </complexType>
+
+
+
+  <complexType name="NewMethods">
+  	<sequence>
+  		<element name="fullQualifiedName" type="string" maxOccurs="unbounded" minOccurs="0"></element>
+  	</sequence>
+  	<attribute name="testprio" type="string"></attribute>
+  </complexType>
+</schema>

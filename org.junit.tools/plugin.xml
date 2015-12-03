@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.junit.tools.generator" name="Generator" schema="schema/org.junit.tools.generator.exsd"/>
+   <extension-point id="org.junit.tools.preferences" name="jut preferences" schema="schema/org.junit.tools.preferences.exsd"/>
+   <extension-point id="org.junit.tools.generator.factory.testdata" name="org.junit.tools.generator.factory.testdata" schema="schema/org.junit.tools.generator.factory.testdata.exsd"/>
+
+   <extension
+     point="org.eclipse.ui.bindings">
+
+	  <key 
+	        commandId="org.junit.tools.handler.SwitchClass"
+	        contextId="org.eclipse.ui.contexts.window"
+	        schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+	        sequence="Ctrl+&lt;">
+	  </key>
+	
+	  <key
+	        commandId="org.junit.tools.handler.GenerateTestClass"
+	        contextId="org.eclipse.ui.contexts.window"
+	        schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+	        sequence="Ctrl+Shift+&lt;">
+	  </key>
+	  
+	  <key 
+	        commandId="org.junit.tools.handler.GenerateMockClass"
+	        contextId="org.eclipse.ui.contexts.window"
+	        schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+	        sequence="Ctrl+Shift+M">
+	  </key>
+	  
+   </extension>
+   
+   <extension
+     point="org.eclipse.ui.commands">
+	  
+	  <command
+	        categoryId="org.eclipse.ui.category.window"
+	        defaultHandler="org.junit.tools.handler.SwitchClassHandler"
+	        description="Switches between test-class and test-subject"
+	        id="org.junit.tools.handler.SwitchClass"
+	        name="Switch test-class and -subject">
+	  </command>
+	       
+	  <command
+	        categoryId="org.eclipse.ui.category.window"
+	        defaultHandler="org.junit.tools.handler.GenerateTestClassHandler"
+	        description="Generate a unit test-class with test-cases"
+	        id="org.junit.tools.handler.GenerateTestClass"
+	        name="Generate unit-test-class">
+	  </command>
+	
+	  <command
+	        categoryId="org.eclipse.ui.category.window"
+	        defaultHandler="org.junit.tools.handler.GenerateTestSuitesHandler"
+	        description="Generate test-suites"
+	        id="org.junit.tools.handler.GenerateTestSuites"
+	        name="Generate test-suites">
+	  </command>
+	
+	  <command
+	        categoryId="org.eclipse.ui.category.window"
+	        defaultHandler="org.junit.tools.handler.GenerateMockClassHandler"
+	        description="Generates a mock-class for the selected class"
+	        id="org.junit.tools.handler.GenerateMockClass"
+	        name="Generates a mock-class">
+	  </command>
+
+	  <command
+	        categoryId="org.eclipse.ui.category.window"
+	        defaultHandler="org.junit.tools.handler.CleanMocksHandler"
+	        description="Clean mock-classes"
+	        id="org.junit.tools.handler.CleanMocks"
+	        name="Clean mock-classes">
+	  </command>	  
+	  
+	  <command
+	        categoryId="org.eclipse.ui.category.window"
+	        defaultHandler="org.junit.tools.handler.CreateNecessaryTestsReportHandler"
+	        description="Create report for necessary tests"
+	        id="org.junit.tools.handler.CreateNecessaryTestsReport"
+	        name="Create report for necessary tests">
+	  </command>
+	  
+   </extension>
+   
+   <extension
+     point="org.eclipse.ui.preferencePages">
+  <page
+        class="org.junit.tools.ui.preferences.JUTPreferenceMainPage"
+        id="org.junit.tools.ui.preferencepage"
+        name="JUnit-Tools">
+  </page>
+  <page
+        category="org.junit.tools.ui.preferencepage"
+        class="org.junit.tools.ui.preferences.JUTPreferenceFilterPage"
+        id="org.junit.tools.ui.filter"
+        name="Filter">
+  </page>
+   </extension>
+  
+   <extension
+     point="org.eclipse.core.runtime.preferences">
+     <scope name="JUTPreferenceMainPage" class="org.junit.tools.ui.preferences.JUTPreferenceMainPage"/>
+  <initializer
+        class="org.junit.tools.preferences.JUTPreferenceInitializer">
+  </initializer>
+   </extension>
+   
+      <extension
+     point="org.eclipse.ltk.core.refactoring.renameParticipants">
+  <renameParticipant
+        class="org.junit.tools.refactoring.RenameTestElements"
+        id="org.junit.tools.refactoring.RenameTestElements"
+        name="org.junit.tools.refactoring.RenameTestElements">
+  	<enablement>
+  	  <with variable="affectedNatures">
+  	    <iterate operator="or">
+  	      <equals value="org.eclipse.jdt.core.javanature"/>
+  	    </iterate>
+  	  </with>
+  	  <with variable="element">
+  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+  	  </with>
+  	</enablement>
+  </renameParticipant>
+   </extension>
+
+  <extension
+        point="org.eclipse.ltk.core.refactoring.moveParticipants">
+     <moveParticipant
+           class="org.junit.tools.refactoring.MoveTestElements"
+           id="org.junit.tools.refactoring.MoveTestElements"
+           name="org.junit.tools.refactoring.MoveTestElements">
+  	<enablement>
+  	  <with variable="affectedNatures">
+  	    <iterate operator="or">
+  	      <equals value="org.eclipse.jdt.core.javanature"/>
+  	    </iterate>
+  	  </with>
+  	  <with variable="element">
+  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+  	  </with>
+  	</enablement>
+     </moveParticipant>
+  </extension>
+  
+  <extension
+        point="org.eclipse.ltk.core.refactoring.deleteParticipants">
+     <deleteParticipant
+           class="org.junit.tools.refactoring.DeleteTestElements"
+           id="org.junit.tools.refactoring.DeleteTestElements"
+           name="org.junit.tools.refactoring.DeleteTestElements">
+
+  	<enablement>
+  	  <with variable="affectedNatures">
+  	    <iterate operator="or">
+  	      <equals value="org.eclipse.jdt.core.javanature"/>
+  	    </iterate>
+  	  </with>
+  	  <with variable="element">
+  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+  	  </with>
+  	</enablement>
+
+     </deleteParticipant>
+  </extension>
+  
+  <extension
+     point="org.eclipse.ui.menus">
+	  <menuContribution
+	        allPopups="true"
+	        locationURI="popup:org.eclipse.ui.popup.any?after=additions"
+	        >  
+	     
+		<visibleWhen>
+		
+		  <or>
+		
+		    <with variable="activePartId">
+		
+		      <equals value="org.eclipse.jdt.ui.CompilationUnitEditor" />
+		
+		    </with>
+		
+		    <with variable="activeMenuSelection">
+		
+		      <iterate ifEmpty="false" operator="and">
+		
+		          <or>
+					  <adapt type="org.eclipse.jdt.core.IJavaProject" />
+					  <adapt type="org.eclipse.core.resources.IProject" />	
+					  <adapt type="org.eclipse.jdt.core.IPackageFragmentRoot" />
+					  <adapt type="org.eclipse.jdt.core.IPackageFragment" />					  	          
+				      <adapt type="org.eclipse.jdt.core.ICompilationUnit" />
+				      <adapt type="org.eclipse.jdt.core.IType" />
+					  <adapt type="org.eclipse.jdt.core.IMethod" />						
+					  <adapt type="org.eclipse.jdt.core.IField" />
+			          <adapt type="org.eclipse.jdt.core.IClassFile" />	
+		          </or>
+		
+		      </iterate>
+		
+		    </with>
+		
+		  </or>
+		
+		</visibleWhen>
+	     
+	     <menu
+	           id="org.junit.tools"
+	           label="JUnit-Tools">
+	           
+	        <command
+	              commandId="org.junit.tools.handler.SwitchClass"
+	              label="Switch test-class and -subject"
+	              style="push">
+	              
+					<visibleWhen>
+					
+					  <or>
+					
+					    <with variable="activePartId">
+					
+					      <equals value="org.eclipse.jdt.ui.CompilationUnitEditor" />
+					
+					    </with>
+					
+
+						<with variable="activeMenuSelection">
+						
+						  <iterate ifEmpty="false" operator="and">
+						
+						    <or>
+						
+						      <adapt type="org.eclipse.jdt.core.ICompilationUnit" />
+						      <adapt type="org.eclipse.jdt.core.IType" />
+							  <adapt type="org.eclipse.jdt.core.IMethod" />						
+							  <adapt type="org.eclipse.jdt.core.IField" />
+                              <adapt type="org.eclipse.jdt.core.IClassFile" />						
+
+						    </or>
+						
+						  </iterate>
+						
+						</with>
+					
+					  </or>
+					
+					</visibleWhen>
+	        </command>	           
+
+	        <command
+	              commandId="org.junit.tools.handler.GenerateTestClass"
+	              label="Generate test-class"
+	              style="push">
+	              
+					<visibleWhen>
+					
+					  <or>
+					
+					    <with variable="activePartId">
+					
+					      <equals value="org.eclipse.jdt.ui.CompilationUnitEditor" />
+					
+					    </with>
+					
+
+						<with variable="activeMenuSelection">
+						
+						  <iterate ifEmpty="false" operator="and">
+						
+						    <or>
+						
+						      <adapt type="org.eclipse.jdt.core.ICompilationUnit" />
+						      <adapt type="org.eclipse.jdt.core.IType" />
+							  <adapt type="org.eclipse.jdt.core.IMethod" />						
+							  <adapt type="org.eclipse.jdt.core.IField" />
+                              <adapt type="org.eclipse.jdt.core.IClassFile" />						
+
+						    </or>
+						
+						  </iterate>
+						
+						</with>
+					
+					  </or>
+					
+					</visibleWhen>
+	        </command>	       
+	        	        
+	        <command
+	              commandId="org.junit.tools.handler.GenerateTestSuites"
+	              label="Generate test-suites"
+	              style="push">
+
+					<visibleWhen>
+					
+					  <or>
+					
+					    <with variable="activePartId">
+					
+					      <equals value="org.eclipse.jdt.ui.CompilationUnitEditor" />
+					
+					    </with>
+					
+
+						<with variable="activeMenuSelection">
+						
+						  <iterate ifEmpty="false" operator="and">
+						
+						    <or>
+						      <adapt type="org.eclipse.jdt.core.IJavaProject" />
+							  <adapt type="org.eclipse.core.resources.IProject" />
+							  <adapt type="org.eclipse.jdt.core.IPackageFragmentRoot" />
+							  <adapt type="org.eclipse.jdt.core.IPackageFragment" />
+						      <adapt type="org.eclipse.jdt.core.ICompilationUnit" />
+						      <adapt type="org.eclipse.jdt.core.IType" />
+							  <adapt type="org.eclipse.jdt.core.IMethod" />						
+							  <adapt type="org.eclipse.jdt.core.IField" />
+                              <adapt type="org.eclipse.jdt.core.IClassFile" />						
+
+						    </or>
+						
+						  </iterate>
+						
+						</with>
+					
+					  </or>
+					
+					</visibleWhen>
+	        </command>	        
+	        
+	        <command
+	              commandId="org.junit.tools.handler.GenerateMockClass"
+	              label="Generate mock-class"
+	              style="push">
+
+					<visibleWhen>
+					
+					  <or>
+					
+					    <with variable="activePartId">
+					
+					      <equals value="org.eclipse.jdt.ui.CompilationUnitEditor" />
+					
+					    </with>
+					
+
+						<with variable="activeMenuSelection">
+						
+						  <iterate ifEmpty="false" operator="and">
+						
+						    <or>
+						
+						      <adapt type="org.eclipse.jdt.core.ICompilationUnit" />
+						      <adapt type="org.eclipse.jdt.core.IType" />
+							  <adapt type="org.eclipse.jdt.core.IMethod" />						
+							  <adapt type="org.eclipse.jdt.core.IField" />
+                              <adapt type="org.eclipse.jdt.core.IClassFile" />						
+
+						    </or>
+						
+						  </iterate>
+						
+						</with>
+					
+					  </or>
+					
+					</visibleWhen>
+	        </command>
+
+	        <command
+	              commandId="org.junit.tools.handler.CleanMocks"
+	              label="Clean mock-classes"
+	              style="push">
+
+					<visibleWhen>
+					
+					  <or>
+					
+					    <with variable="activePartId">
+					
+					      <equals value="org.eclipse.jdt.ui.CompilationUnitEditor" />
+					
+					    </with>
+					
+
+						<with variable="activeMenuSelection">
+						
+						  <iterate ifEmpty="false" operator="and">
+						
+						    <or>
+						      <adapt type="org.eclipse.jdt.core.IJavaProject" />
+							  <adapt type="org.eclipse.core.resources.IProject" />
+							  <adapt type="org.eclipse.jdt.core.IPackageFragmentRoot" />
+							  <adapt type="org.eclipse.jdt.core.IPackageFragment" />							  
+						      <adapt type="org.eclipse.jdt.core.ICompilationUnit" />
+						      <adapt type="org.eclipse.jdt.core.IType" />
+							  <adapt type="org.eclipse.jdt.core.IMethod" />						
+							  <adapt type="org.eclipse.jdt.core.IField" />
+                              <adapt type="org.eclipse.jdt.core.IClassFile" />						
+
+						    </or>
+						
+						  </iterate>
+						
+						</with>
+					
+					  </or>
+					
+					</visibleWhen>
+	        </command>	  	        
+	        
+	        <command
+	              commandId="org.junit.tools.handler.CreateNecessaryTestsReport"
+	              label="Create report for necessary tests"
+	              style="push">
+
+					<visibleWhen>
+					
+					  <or>
+					
+					    <with variable="activePartId">
+					
+					      <equals value="org.eclipse.jdt.ui.CompilationUnitEditor" />
+					
+					    </with>
+					
+
+						<with variable="activeMenuSelection">
+						
+						  <iterate ifEmpty="false" operator="and">
+						
+						    <or>
+							  <adapt type="org.eclipse.jdt.core.IJavaProject" />
+							  <adapt type="org.eclipse.core.resources.IProject" />
+							  <adapt type="org.eclipse.jdt.core.IPackageFragmentRoot" />
+							  <adapt type="org.eclipse.jdt.core.IPackageFragment" />							  
+						      <adapt type="org.eclipse.jdt.core.ICompilationUnit" />
+						      <adapt type="org.eclipse.jdt.core.IType" />
+							  <adapt type="org.eclipse.jdt.core.IMethod" />						
+							  <adapt type="org.eclipse.jdt.core.IField" />
+                              <adapt type="org.eclipse.jdt.core.IClassFile" />						
+						    </or>
+						
+						  </iterate>
+						
+						</with>
+					
+					  </or>
+					
+					</visibleWhen>
+	        </command>
+	        
+	     </menu>
+	  </menuContribution>
+   </extension>
+ 
+   
+</plugin>
