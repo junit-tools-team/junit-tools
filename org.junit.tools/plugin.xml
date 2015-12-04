@@ -85,86 +85,23 @@
    </extension>
    
    <extension
-     point="org.eclipse.ui.preferencePages">
-  <page
-        class="org.junit.tools.ui.preferences.JUTPreferenceMainPage"
-        id="org.junit.tools.ui.preferencepage"
-        name="JUnit-Tools">
-  </page>
-  <page
-        category="org.junit.tools.ui.preferencepage"
-        class="org.junit.tools.ui.preferences.JUTPreferenceFilterPage"
-        id="org.junit.tools.ui.filter"
-        name="Filter">
-  </page>
-   </extension>
-  
-   <extension
-     point="org.eclipse.core.runtime.preferences">
-     <scope name="JUTPreferenceMainPage" class="org.junit.tools.ui.preferences.JUTPreferenceMainPage"/>
-  <initializer
-        class="org.junit.tools.preferences.JUTPreferenceInitializer">
-  </initializer>
-   </extension>
-   
-      <extension
-     point="org.eclipse.ltk.core.refactoring.renameParticipants">
-  <renameParticipant
-        class="org.junit.tools.refactoring.RenameTestElements"
-        id="org.junit.tools.refactoring.RenameTestElements"
-        name="org.junit.tools.refactoring.RenameTestElements">
-  	<enablement>
-  	  <with variable="affectedNatures">
-  	    <iterate operator="or">
-  	      <equals value="org.eclipse.jdt.core.javanature"/>
-  	    </iterate>
-  	  </with>
-  	  <with variable="element">
-  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
-  	  </with>
-  	</enablement>
-  </renameParticipant>
-   </extension>
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="org.junit.tools.toolbar">
+            <command
+	              commandId="org.junit.tools.handler.GenerateTestClass"
+	              label="Generate test-class"
+                  icon="res/icons/jut.png"
+                  style="push"
+                  tooltip="Generate test-class">
 
-  <extension
-        point="org.eclipse.ltk.core.refactoring.moveParticipants">
-     <moveParticipant
-           class="org.junit.tools.refactoring.MoveTestElements"
-           id="org.junit.tools.refactoring.MoveTestElements"
-           name="org.junit.tools.refactoring.MoveTestElements">
-  	<enablement>
-  	  <with variable="affectedNatures">
-  	    <iterate operator="or">
-  	      <equals value="org.eclipse.jdt.core.javanature"/>
-  	    </iterate>
-  	  </with>
-  	  <with variable="element">
-  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
-  	  </with>
-  	</enablement>
-     </moveParticipant>
-  </extension>
-  
-  <extension
-        point="org.eclipse.ltk.core.refactoring.deleteParticipants">
-     <deleteParticipant
-           class="org.junit.tools.refactoring.DeleteTestElements"
-           id="org.junit.tools.refactoring.DeleteTestElements"
-           name="org.junit.tools.refactoring.DeleteTestElements">
-
-  	<enablement>
-  	  <with variable="affectedNatures">
-  	    <iterate operator="or">
-  	      <equals value="org.eclipse.jdt.core.javanature"/>
-  	    </iterate>
-  	  </with>
-  	  <with variable="element">
-  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
-  	  </with>
-  	</enablement>
-
-     </deleteParticipant>
-  </extension>
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>   
   
   <extension
      point="org.eclipse.ui.menus">
@@ -253,7 +190,8 @@
 	        <command
 	              commandId="org.junit.tools.handler.GenerateTestClass"
 	              label="Generate test-class"
-	              style="push">
+	              style="push"
+	              icon="res/icons/jut.png">
 	              
 					<visibleWhen>
 					
@@ -457,5 +395,85 @@
 	  </menuContribution>
    </extension>
  
+   <extension
+     point="org.eclipse.ui.preferencePages">
+  <page
+        class="org.junit.tools.ui.preferences.JUTPreferenceMainPage"
+        id="org.junit.tools.ui.preferencepage"
+        name="JUnit-Tools">
+  </page>
+  <page
+        category="org.junit.tools.ui.preferencepage"
+        class="org.junit.tools.ui.preferences.JUTPreferenceFilterPage"
+        id="org.junit.tools.ui.filter"
+        name="Filter">
+  </page>
+   </extension>
+  
+   <extension
+     point="org.eclipse.core.runtime.preferences">
+     <scope name="JUTPreferenceMainPage" class="org.junit.tools.ui.preferences.JUTPreferenceMainPage"/>
+  <initializer
+        class="org.junit.tools.preferences.JUTPreferenceInitializer">
+  </initializer>
+   </extension>
    
+      <extension
+     point="org.eclipse.ltk.core.refactoring.renameParticipants">
+  <renameParticipant
+        class="org.junit.tools.refactoring.RenameTestElements"
+        id="org.junit.tools.refactoring.RenameTestElements"
+        name="org.junit.tools.refactoring.RenameTestElements">
+  	<enablement>
+  	  <with variable="affectedNatures">
+  	    <iterate operator="or">
+  	      <equals value="org.eclipse.jdt.core.javanature"/>
+  	    </iterate>
+  	  </with>
+  	  <with variable="element">
+  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+  	  </with>
+  	</enablement>
+  </renameParticipant>
+   </extension>
+
+  <extension
+        point="org.eclipse.ltk.core.refactoring.moveParticipants">
+     <moveParticipant
+           class="org.junit.tools.refactoring.MoveTestElements"
+           id="org.junit.tools.refactoring.MoveTestElements"
+           name="org.junit.tools.refactoring.MoveTestElements">
+  	<enablement>
+  	  <with variable="affectedNatures">
+  	    <iterate operator="or">
+  	      <equals value="org.eclipse.jdt.core.javanature"/>
+  	    </iterate>
+  	  </with>
+  	  <with variable="element">
+  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+  	  </with>
+  	</enablement>
+     </moveParticipant>
+  </extension>
+  
+  <extension
+        point="org.eclipse.ltk.core.refactoring.deleteParticipants">
+     <deleteParticipant
+           class="org.junit.tools.refactoring.DeleteTestElements"
+           id="org.junit.tools.refactoring.DeleteTestElements"
+           name="org.junit.tools.refactoring.DeleteTestElements">
+
+  	<enablement>
+  	  <with variable="affectedNatures">
+  	    <iterate operator="or">
+  	      <equals value="org.eclipse.jdt.core.javanature"/>
+  	    </iterate>
+  	  </with>
+  	  <with variable="element">
+  	  	 	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+  	  </with>
+  	</enablement>
+
+     </deleteParticipant>
+  </extension>   
 </plugin>
