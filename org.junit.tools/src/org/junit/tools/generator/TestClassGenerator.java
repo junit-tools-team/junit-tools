@@ -61,13 +61,15 @@ import org.junit.tools.preferences.JUTPreferences;
 @SuppressWarnings("restriction")
 // TODO avoid restrictions
 public class TestClassGenerator implements ITestClassGenerator,
-	IGeneratorConstants {
+		IGeneratorConstants {
 
 	protected String testmethodPrefix;
 
 	protected String testmethodPostfix;
 
 	protected boolean defaultTestbaseMethodCreated = false;
+
+	private String annoGenerated = null;
 
 	@Override
 	public ICompilationUnit generate(GeneratorModel model,
