@@ -555,8 +555,8 @@ public class MainController implements IGeneratorConstants {
 		boolean result = MessageDialog
 			.openConfirm(
 				shell,
-				"Neue Testklasse generieren?",
-				"Es konnte keine bestehende Testklasse gefunden werden. M�chten Sie eine neue Testklasse generieren?");
+				"Generate new test-class?",
+				"No existing test-class found (perhaps the configuration is wrong). Would you like to generate a new test-class?");
 
 		if (result) {
 		    generateTestclass(activeWorkbenchWindow, uTMElements);
