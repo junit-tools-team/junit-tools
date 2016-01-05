@@ -30,7 +30,7 @@ public class JUTPreferenceInitializer extends AbstractPreferenceInitializer
 
 	store.setDefault(TEST_CLASS_POSTFIX, "Test");
 
-	store.setDefault(TEST_PACKAGE_POSTFIX, "test");
+	store.setDefault(TEST_PACKAGE_POSTFIX, "");
 
 	store.setDefault(TEST_METHOD_PREFIX, "test");
 	store.setDefault(TEST_METHOD_POSTFIX, "");
