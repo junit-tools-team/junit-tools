@@ -58,7 +58,7 @@ public class MainController implements IGeneratorConstants {
     private ICompilationUnit generatedTestClass = null;
 
     private boolean warning = false;
-    
+
     private JUTWarning warningException;
 
     private boolean error = false;
@@ -80,8 +80,8 @@ public class MainController implements IGeneratorConstants {
      * @throws CoreException
      */
     public boolean generateTestclass(IWorkbenchWindow activeWorkbenchWindow,
-	    IStructuredSelection selection) throws JUTException,
-	    JUTWarning, CoreException {
+	    IStructuredSelection selection) throws JUTException, JUTWarning,
+	    CoreException {
 	JUTElements jutElements = detectJUTElements(selection, null);
 	return generateTestclass(activeWorkbenchWindow, jutElements);
     }
@@ -97,19 +97,19 @@ public class MainController implements IGeneratorConstants {
      * @throws CoreException
      */
     public boolean generateTestclass(IWorkbenchWindow activeWorkbenchWindow,
-	    IFileEditorInput fileEditorInput) throws JUTException,
-	    JUTWarning, CoreException {
+	    IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
+	    CoreException {
 	JUTElements jutElements = detectJUTElements(null, fileEditorInput);
 	return generateTestclass(activeWorkbenchWindow, jutElements);
     }
-    
+
     protected ExtensionPointHandler getExtensionHandler() {
 	if (extensionHandler == null) {
 	    extensionHandler = Activator.getDefault().getExtensionHandler();
 	}
-	
+
 	return extensionHandler;
-    } 
+    }
 
     /**
      * Generates a test-class.
@@ -122,8 +122,7 @@ public class MainController implements IGeneratorConstants {
      */
     protected boolean generateTestclass(
 	    final IWorkbenchWindow activeWorkbenchWindow,
-	    JUTElements jutElements) throws JUTException,
-	    JUTWarning {
+	    JUTElements jutElements) throws JUTException, JUTWarning {
 	if (jutElements == null) {
 	    throw new JUTWarning(
 		    "No elements found! Perhaps baseclass changed.");
@@ -131,8 +130,7 @@ public class MainController implements IGeneratorConstants {
 
 	JUTProjects projects = jutElements.getProjects();
 	if (projects == null) {
-	    throw new JUTWarning(
-		    "No project found! Perhaps baseclass changed.");
+	    throw new JUTWarning("No project found! Perhaps baseclass changed.");
 	}
 
 	try {
@@ -193,9 +191,11 @@ public class MainController implements IGeneratorConstants {
 		public void run(IProgressMonitor monitor) {
 		    try {
 			ICompilationUnit generatedClass = null;
-			for (ITestClassGenerator testClassGenerator : getExtensionHandler().getTestClassGenerators()) {
+			for (ITestClassGenerator testClassGenerator : getExtensionHandler()
+				.getTestClassGenerators()) {
 			    generatedClass = testClassGenerator.generate(model,
-				    getExtensionHandler().getTestDataFactories(), monitor);
+				    getExtensionHandler()
+					    .getTestDataFactories(), monitor);
 			}
 			setGeneratedTestClass(generatedClass);
 
@@ -275,7 +275,8 @@ public class MainController implements IGeneratorConstants {
     protected ArrayList<ICompilationUnit> generateTestSuites(
 	    JUTElements jutElements) throws CoreException {
 
-	for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault().getExtensionHandler().getTestSuitesGenerators()) {
+	for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
+		.getExtensionHandler().getTestSuitesGenerators()) {
 	    testSuitesGenerator.generateTestSuites(jutElements);
 	    return testSuitesGenerator.getGeneratedTestSuites();
 	}
@@ -295,18 +296,17 @@ public class MainController implements IGeneratorConstants {
 	EclipseUIUtils.openInEditor(shell, generatedTestclass);
     }
 
-
-    private JUTElements detectJUTElements(ISelection selection) throws JUTException, JUTWarning, CoreException {
+    private JUTElements detectJUTElements(ISelection selection)
+	    throws JUTException, JUTWarning, CoreException {
 	if (selection instanceof IStructuredSelection) {
-	    return detectJUTElements((IStructuredSelection)selection, null);
+	    return detectJUTElements((IStructuredSelection) selection, null);
+	} else if (selection instanceof IFileEditorInput) {
+	    return detectJUTElements(null, (IFileEditorInput) selection);
 	}
-	else if (selection instanceof IFileEditorInput) {
-	    return detectJUTElements(null, (IFileEditorInput)selection);
-	}
-	
+
 	return null;
     }
-    
+
     /**
      * @throws CoreException
      * @throws JavaModelException
@@ -318,8 +318,8 @@ public class MainController implements IGeneratorConstants {
      * @throws
      */
     private JUTElements detectJUTElements(IStructuredSelection selection,
-	    IFileEditorInput fileEditorInput) throws JUTException,
-	    JUTWarning, CoreException {
+	    IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
+	    CoreException {
 
 	JUTElements jutElements = new JUTElements();
 
@@ -331,8 +331,7 @@ public class MainController implements IGeneratorConstants {
 	    if (editorInput != null && editorInput instanceof IFileEditorInput) {
 		fileEditorInput = (IFileEditorInput) editorInput;
 	    } else {
-		throw new JUTWarning(
-			Messages.General_warning_nothing_selected);
+		throw new JUTWarning(Messages.General_warning_nothing_selected);
 	    }
 	}
 
@@ -342,8 +341,8 @@ public class MainController implements IGeneratorConstants {
 	jutElements.initProjects(project);
 
 	// classes and packages
-	Vector<IJavaElement> elements = JDTUtils.getCompilationUnits(
-		selection, fileEditorInput);
+	Vector<IJavaElement> elements = JDTUtils.getCompilationUnits(selection,
+		fileEditorInput);
 
 	Vector<ICompilationUnit> cuList;
 	cuList = new Vector<ICompilationUnit>();
@@ -376,8 +375,7 @@ public class MainController implements IGeneratorConstants {
 		    selectedMethod = (IMethod) firstElement;
 		}
 	    } else if (fileEditorInput != null) {
-		selectedMethod = JDTUtils
-			.getSelectedMethod(fileEditorInput);
+		selectedMethod = JDTUtils.getSelectedMethod(fileEditorInput);
 	    }
 
 	    jutElements.getConstructorsAndMethods().setSelectedMethod(
@@ -472,7 +470,8 @@ public class MainController implements IGeneratorConstants {
 	    throw new JUTWarning("Select a test-project!");
 	}
 
-	for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault().getExtensionHandler().getTestSuitesGenerators()) {
+	for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
+		.getExtensionHandler().getTestSuitesGenerators()) {
 	    if (!testSuitesGenerator.generateTestSuites(testProject)) {
 		return false;
 	    }
@@ -487,8 +486,8 @@ public class MainController implements IGeneratorConstants {
      * @throws CoreException
      */
     public boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
-	    IStructuredSelection selection) throws JUTException,
-	    JUTWarning, CoreException {
+	    IStructuredSelection selection) throws JUTException, JUTWarning,
+	    CoreException {
 	JUTElements uTMElements = detectJUTElements(selection, null);
 	if (uTMElements == null) {
 	    return false;
@@ -503,8 +502,8 @@ public class MainController implements IGeneratorConstants {
      * @throws CoreException
      */
     public boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
-	    IFileEditorInput fileEditorInput) throws JUTException,
-	    JUTWarning, CoreException {
+	    IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
+	    CoreException {
 	JUTElements uTMElements = detectJUTElements(null, fileEditorInput);
 	if (uTMElements == null) {
 	    return false;
@@ -513,8 +512,8 @@ public class MainController implements IGeneratorConstants {
     }
 
     private boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
-	    JUTElements uTMElements) throws JUTException,
-	    JUTWarning, JavaModelException {
+	    JUTElements uTMElements) throws JUTException, JUTWarning,
+	    JavaModelException {
 	IMethod selectedMethod = uTMElements.getConstructorsAndMethods()
 		.getSelectedMethod();
 	JUTProjects projects = uTMElements.getProjects();
@@ -570,11 +569,11 @@ public class MainController implements IGeneratorConstants {
     }
 
     public void createReport(IWorkbenchWindow workbenchWindow,
-	    final ISelection selection) throws JUTException,
-	    JUTWarning, CoreException {
+	    final ISelection selection) throws JUTException, JUTWarning,
+	    CoreException {
 	setError(false);
 	setWarning(null);
-	
+
 	IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
 
 	    @Override
@@ -582,10 +581,11 @@ public class MainController implements IGeneratorConstants {
 		try {
 		    JUTElements jutElements = detectJUTElements(selection);
 		    if (jutElements == null) {
-			setWarning(new JUTWarning(Messages.GeneratorUtils_SelectionNotSupported));
+			setWarning(new JUTWarning(
+				Messages.GeneratorUtils_SelectionNotSupported));
 			return;
 		    }
-		    
+
 		    ReportCreator rc = new ReportCreator();
 		    rc.createNecessaryTestclassesReport(jutElements, monitor);
 		    monitor.done();
@@ -603,8 +603,7 @@ public class MainController implements IGeneratorConstants {
 
 	if (isWarning()) {
 	    throw warningException;
-	}
-	else if (isError()) {
+	} else if (isError()) {
 	    throw new JUTException(errorException);
 	}
 
@@ -612,15 +611,14 @@ public class MainController implements IGeneratorConstants {
 
     protected void setWarning(JUTWarning jutWarning) {
 	warningException = jutWarning;
-	
+
 	if (jutWarning == null) {
 	    warning = false;
-	}
-	else {
+	} else {
 	    warning = true;
 	}
     }
-    
+
     private boolean isWarning() {
 	return warning;
     }
