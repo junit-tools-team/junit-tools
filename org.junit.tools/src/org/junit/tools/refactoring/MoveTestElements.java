@@ -13,6 +13,7 @@ import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 import org.junit.tools.generator.model.JUTElements;
 import org.junit.tools.generator.model.JUTElements.JUTClassesAndPackages;
 import org.junit.tools.generator.utils.JDTUtils;
+import org.junit.tools.preferences.JUTPreferences;
 
 public class MoveTestElements extends MoveParticipant {
 
@@ -66,17 +67,16 @@ public class MoveTestElements extends MoveParticipant {
 			IJavaProject testProject = utmElements.getProjects()
 				.getTestProject();
 			IPackageFragment newTestPackage = JDTUtils.getPackage(
-				testProject, newPackage.getElementName(), true);
+				testProject, JUTPreferences.getTestSourceFolderName(), newPackage.getElementName(), true);
 
 			testCu.move(newTestPackage, null, null, true, pm2);
 
-			// TODO organise imports, testsuites aktualisieren,
-			// package evtl. l�schen
+			// TODO organize imports, test-suites actualize,
+			// probably delete package
 		    }
 
 		} catch (Exception e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
+		    // TODO error-handling
 		}
 
 		return null;

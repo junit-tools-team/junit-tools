@@ -25,6 +25,8 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 
     private static String testProjectPostfix = null;
 
+    private static String testSourceFolderName = null;
+    
     private static String testPackagePostfix = null;
 
     private static String testMethodPrefix = null;
@@ -75,6 +77,13 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 	return testProjectPostfix;
     }
 
+    public static String getTestSourceFolderName() {
+	if (testSourceFolderName == null) {
+	    testSourceFolderName = getPreference(TEST_SOURCE_FOLDER_NAME);
+	}
+	return testSourceFolderName;
+    }
+    
     public static String getTestMethodPostfix() {
 	if (testMethodPostfix == null) {
 	    testMethodPostfix = getPreference(TEST_METHOD_POSTFIX);
@@ -115,6 +124,10 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 
     protected static void setTestProjectPostfix(String testProjectPostfixPref) {
 	JUTPreferences.testProjectPostfix = testProjectPostfixPref;
+    }
+    
+    protected static void setTestSourceFolderName(String testSourceFolderName) {
+	JUTPreferences.testSourceFolderName = testSourceFolderName;
     }
 
     protected static void setTestMethodPostfix(String testmethodPostfixPref) {
@@ -184,7 +197,11 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 			if (event.getProperty() == TEST_PROJECT_POSTFIX) {
 			    setTestProjectPostfix((String) event.getNewValue());
 			    return;
-			} else if (event.getProperty() == TML_CONTAINER) {
+			} else if (event.getProperty() == TEST_SOURCE_FOLDER_NAME) {
+			    setTestSourceFolderName((String) event.getNewValue());
+			    return;
+			}  
+			else if (event.getProperty() == TML_CONTAINER) {
 			    setTmlContainer((String) event.getNewValue());
 			    return;
 			} else if (event.getProperty() == WRITE_TML) {

@@ -335,12 +335,13 @@ public class MainController implements IGeneratorConstants {
 	    }
 	}
 
-	// projects
-	// get project via selection
+	// get JUT-Elements
 	IJavaProject project = JDTUtils.getProject(selection, fileEditorInput);
-	jutElements.initProjects(project);
 
-	// classes and packages
+	if (project == null || !project.exists()) {
+	    throw new JUTWarning(Messages.General_warning_nothing_selected);
+	}
+
 	Vector<IJavaElement> elements = JDTUtils.getCompilationUnits(selection,
 		fileEditorInput);
 
@@ -354,6 +355,9 @@ public class MainController implements IGeneratorConstants {
 	}
 
 	if (cuList.size() > 0) {
+	    // init projects with cu
+	    jutElements.initProjects(project, cuList.firstElement());
+
 	    jutElements.initClassesAndPackages(cuList);
 
 	    if (!jutElements.getClassesAndPackages().getBaseClass().exists()) {
@@ -381,6 +385,9 @@ public class MainController implements IGeneratorConstants {
 	    jutElements.getConstructorsAndMethods().setSelectedMethod(
 		    selectedMethod);
 
+	} else {
+	    // init projects without cu
+	    jutElements.initProjects(project);
 	}
 
 	return jutElements;
@@ -514,6 +521,14 @@ public class MainController implements IGeneratorConstants {
     private boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
 	    JUTElements uTMElements) throws JUTException, JUTWarning,
 	    JavaModelException {
+	JUTConstructorsAndMethods constructorsAndMethods = uTMElements
+		.getConstructorsAndMethods();
+	if (constructorsAndMethods == null) {
+	    throw new JUTWarning(
+		    "No constructors and methods were found! Perhaps the preferences are wrong or some manual changes were done which are not compatible. "
+			    + "Elsewise create an issue or contact the JUnit-Tools-Team.");
+	}
+
 	IMethod selectedMethod = uTMElements.getConstructorsAndMethods()
 		.getSelectedMethod();
 	JUTProjects projects = uTMElements.getProjects();

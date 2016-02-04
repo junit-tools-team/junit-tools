@@ -21,6 +21,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.junit.tools.generator.model.JUTElements;
 import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
+import org.junit.tools.preferences.JUTPreferences;
 
 public class RenameTestElements extends RenameParticipant {
 
@@ -136,6 +137,8 @@ public class RenameTestElements extends RenameParticipant {
 			    IPackageFragment newBasePackage = JDTUtils
 				    .getPackage(
 					    oldBasePackage.getJavaProject(),
+					    JUTPreferences
+						    .getTestSourceFolderName(),
 					    getArguments().getNewName(), false);
 			    JUTElements utmElementsNew = JUTElements
 				    .initJUTElements(

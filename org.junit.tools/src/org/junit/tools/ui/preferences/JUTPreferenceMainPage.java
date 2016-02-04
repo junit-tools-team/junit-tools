@@ -33,6 +33,10 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 		Messages.JUTPreferenceMainPage_Test_project_postfix,
 		getFieldEditorParent()));
 
+	addField(new StringFieldEditor(TEST_SOURCE_FOLDER_NAME,
+		Messages.JUTPreferenceMainPage_Test_source_folder_name,
+		getFieldEditorParent()));
+	
 	addField(new StringFieldEditor(TEST_PACKAGE_POSTFIX,
 		Messages.JUTPreferenceMainPage_Test_package_postfix,
 		getFieldEditorParent()));

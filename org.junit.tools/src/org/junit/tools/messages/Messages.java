@@ -138,6 +138,7 @@ public class Messages extends NLS {
     public static String JUTPreferenceMainPage_Test_class_postfix;
     public static String JUTPreferenceMainPage_Test_Method_postfix;
     public static String JUTPreferenceMainPage_Test_method_prefix;
+    public static String JUTPreferenceMainPage_Test_source_folder_name;
     public static String JUTPreferenceMainPage_Test_package_postfix;
     public static String JUTPreferenceMainPage_Test_project_postfix;
     public static String JUTPreferenceMainPage_Testclass_supertype;

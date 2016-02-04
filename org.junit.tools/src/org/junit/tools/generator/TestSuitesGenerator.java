@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -202,64 +203,74 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 		IPackageFragment baseTestSuitePackage = null;
 		ICompilationUnit[] baseTestSuiteCuList = null;
 
-		for (IPackageFragment pf : testProject.getPackageFragments()) {
-		    if (pf.getKind() == IPackageFragmentRoot.K_SOURCE) {
+		IFolder testSourceFolder = JDTUtils
+			.getTestSourceFolder(testProject);
+		IPackageFragmentRoot testFragmentRoot = testProject
+			.getPackageFragmentRoot(testSourceFolder);
 
-			if (pf.getElementName().endsWith(".testbase")) {
-			    baseTestSuitePackage = pf;
-			    baseTestSuiteCuList = pf.getCompilationUnits();
-			    continue;
+		for (IJavaElement javaElement : testFragmentRoot.getChildren()) {
+
+		    if (javaElement instanceof IPackageFragment) {
+			IPackageFragment pf = (IPackageFragment) javaElement;
+			if (pf.getKind() == IPackageFragmentRoot.K_SOURCE) {
+
+			    if (pf.getElementName().endsWith(".testbase")) {
+				baseTestSuitePackage = pf;
+				baseTestSuiteCuList = pf.getCompilationUnits();
+				continue;
+			    }
+
+			    if (pf.getCompilationUnits().length == 0) {
+				continue;
+			    }
+
+			    // TestSuiteDeclaration erzeugen
+			    tsdTmp = new TestSuiteDeclaration();
+			    tsdTmp.setName(TESTSUITE_PREFIX);
+			    tsdTmp.setPackageFragment(pf);
+			    tsdTmp.setCuList(pf.getCompilationUnits());
+
+			    // zuordnen
+			    if (tsdBefore == null || "".equals(packageBefore)) {
+				testSuiteDeclarations.add(tsdTmp);
+			    } else if (JDTUtils.isParentPackage(packageBefore,
+				    pf.getElementName())) {
+				tsdTmp.setParent(tsdBefore);
+				tsdBefore.getChildTestSuiteDeclarations().add(
+					tsdTmp);
+			    } else if (tsdBefore.getParent() != null
+				    && JDTUtils.isParentPackage(tsdBefore
+					    .getParent().getPackageName(), pf
+					    .getElementName())) {
+				tsdTmp.setParent(tsdBefore.getParent());
+				tsdBefore.getParent()
+					.getChildTestSuiteDeclarations()
+					.add(tsdTmp);
+			    } else {
+				testSuiteDeclarations.add(tsdTmp);
+			    }
+
+			    tsdBefore = tsdTmp;
+			    packageBefore = pf.getElementName();
 			}
-
-			if (pf.getCompilationUnits().length == 0) {
-			    continue;
-			}
-
-			// TestSuiteDeclaration erzeugen
-			tsdTmp = new TestSuiteDeclaration();
-			tsdTmp.setName(TESTSUITE_PREFIX);
-			tsdTmp.setPackageFragment(pf);
-			tsdTmp.setCuList(pf.getCompilationUnits());
-
-			// zuordnen
-			if (tsdBefore == null || "".equals(packageBefore)) {
-			    testSuiteDeclarations.add(tsdTmp);
-			} else if (JDTUtils.isParentPackage(packageBefore,
-				pf.getElementName())) {
-			    tsdTmp.setParent(tsdBefore);
-			    tsdBefore.getChildTestSuiteDeclarations().add(
-				    tsdTmp);
-			} else if (tsdBefore.getParent() != null
-				&& JDTUtils.isParentPackage(tsdBefore
-					.getParent().getPackageName(), pf
-					.getElementName())) {
-			    tsdTmp.setParent(tsdBefore.getParent());
-			    tsdBefore.getParent()
-				    .getChildTestSuiteDeclarations()
-				    .add(tsdTmp);
-			} else {
-			    testSuiteDeclarations.add(tsdTmp);
-			}
-
-			tsdBefore = tsdTmp;
-			packageBefore = pf.getElementName();
 		    }
-		}
 
-		for (TestSuiteDeclaration tsd : testSuiteDeclarations) {
-		    processTestSuiteDeclaration(tsd);
-		}
+		    for (TestSuiteDeclaration tsd : testSuiteDeclarations) {
+			processTestSuiteDeclaration(tsd);
+		    }
 
-		if (baseTestSuitePackage == null) {
-		    baseTestSuitePackage = JDTUtils.getPackage(testProject,
-			    testProject.getElementName() + ".testbase", true);
-		    baseTestSuiteCuList = new ICompilationUnit[0];
-		}
+		    if (baseTestSuitePackage == null) {
+			baseTestSuitePackage = JDTUtils.getPackage(testProject,
+				testFragmentRoot, testProject.getElementName()
+					+ ".testbase", true);
+			baseTestSuiteCuList = new ICompilationUnit[0];
+		    }
 
-		// create base-test-suite
-		processTestSuiteDeclaration("TestSuiteAll",
-			baseTestSuitePackage, baseTestSuiteCuList,
-			createRootTestSuiteNameList(testSuiteDeclarations));
+		    // create base-test-suite
+		    processTestSuiteDeclaration("TestSuiteAll",
+			    baseTestSuitePackage, baseTestSuiteCuList,
+			    createRootTestSuiteNameList(testSuiteDeclarations));
+		}
 	    }
 
 	}, null);
@@ -535,10 +546,14 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 		IType testSuiteType = refreshTestSuiteElements(testSuite,
 			TESTSUITE_PREFIX, testElementList);
 
-		// test-suite deleted
-		if (testSuiteType == null) {
+		// if only the test-class and the test-suite is in the package,
+		// then delete the complete package
+		if (testSuiteType == null
+			&& packageOfDeletedClass.getCompilationUnits().length == 2) {
+		    // delete empty packages, if no class is inside
 		    JDTUtils.deletePackages(packageOfDeletedClass);
 		}
+
 	    }
 
 	}, null);

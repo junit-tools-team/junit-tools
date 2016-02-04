@@ -25,6 +25,8 @@ public class JUTPreferenceInitializer extends AbstractPreferenceInitializer
 	store.setDefault(TML_CONTAINER, "test_files");
 
 	store.setDefault(TEST_PROJECT_POSTFIX, ".test");
+	
+	store.setDefault(TEST_SOURCE_FOLDER_NAME, "src");
 
 	store.setDefault(TEST_CLASS_SUPER_TYPE, "");
 

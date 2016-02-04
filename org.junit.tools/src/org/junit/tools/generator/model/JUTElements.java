@@ -2,8 +2,10 @@ package org.junit.tools.generator.model;
 
 import java.util.Vector;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -163,7 +165,7 @@ public class JUTElements {
 		throws CoreException {
 	    if (createIfNotExists
 		    && (testPackage == null || !testPackage.exists())) {
-		testPackage = JDTUtils.createPackage(projects.getTestProject(),
+		testPackage = JDTUtils.createPackage(projects.getTestProject(), JUTPreferences.getTestSourceFolderName(),
 			testPackageName);
 	    }
 	    return testPackage;
@@ -356,7 +358,7 @@ public class JUTElements {
 	this.constructorsAndMethods = constructorsAndMethods;
     }
 
-    public JUTProjects initProjects(IJavaProject project) throws JUTWarning {
+    public JUTProjects initProjects(IJavaProject project, ICompilationUnit cu) throws JUTWarning {
 	JUTProjects tmpProjects = new JUTProjects();
 
 	if (project == null) {
@@ -365,9 +367,9 @@ public class JUTElements {
 
 	String projectName = project.getElementName();
 	String testProjectPostfix = JUTPreferences.getTestProjectPostfix();
-	String testPackagePostfix = JUTPreferences.getTestPackagePostfix();
 
-	if (projectName.endsWith(testProjectPostfix)) {
+	// test project selected
+	if (!testProjectPostfix.equals("") && projectName.endsWith(testProjectPostfix)) {
 	    tmpProjects.setBaseProjectSelected(false);
 
 	    tmpProjects.setTestProject((IJavaProject) project);
@@ -384,16 +386,65 @@ public class JUTElements {
 		    .getProject(projectName);
 	    tmpProjects.setBaseProject(baseProject);
 	} else {
-	    tmpProjects.setBaseProjectSelected(true);
 	    tmpProjects.setBaseProject((IJavaProject) project);
+	    IJavaProject testProject;
+	    
+	    if (testProjectPostfix.equals("")) {
+		// base- and test-project have same names
+		tmpProjects.setBaseProjectSelected(false);
+		testProject = (IJavaProject)project;
+		
+		// identify by test-class-name and test-source-folder-name
+		if (cu != null) {
+		    String testClassPostfix = JUTPreferences
+			    .getTestClassPostfix();
+		    
+		    if (!"".equals(testClassPostfix)) {
+			String cuName = cu.getElementName().replace(".java", "");
+			cuName = cuName.replace(".class", "");
+			
+			if (!cuName.endsWith(testClassPostfix)) {
+			    tmpProjects.setBaseProjectSelected(true);
+			}
+		    }
+		    else {
+			String testSourceFolderName = JUTPreferences.getTestProjectPostfix();
+			if ("src".equals(testSourceFolderName) || "".equals(testSourceFolderName)) {
+			    // same folder as base-class - no difference to base-class
+			    tmpProjects.setBaseProjectSelected(true);
+			}
+			else {
+			    // get the source folder of the selected cu
+			    IPackageFragment cuPackage = JDTUtils
+				    .getPackage(cu);
+			    IJavaElement parent = cuPackage.getParent();
 
-	    // get test project
-	    projectName += testProjectPostfix;
-	    tmpProjects.setTestProjectName(projectName);
+			    if (parent instanceof IFolder) {
+				IFolder srcFolder = (IFolder) parent;
 
-	    IJavaProject testProject = JDTUtils.getProject(projectName, false,
-		    project);
+				// is the selected class in the test-source-folder
+				if (!srcFolder.equals(testSourceFolderName)) {
+				    tmpProjects.setBaseProjectSelected(true);
+				}
+			    }
+			}
+		    }
+		}
+		else {
+		    tmpProjects.setBaseProjectSelected(true);
+		}
+	    }
+	    else {
+		// base-project selected
+		tmpProjects.setBaseProjectSelected(true);
+		
+		projectName += testProjectPostfix;
+		testProject = JDTUtils.getProject(projectName, false,
+			project);
+	    }
+	    
 	    if (testProject != null) {
+		tmpProjects.setTestProjectName(testProject.getElementName());
 		tmpProjects.setTestProject(testProject);
 	    }
 	}
@@ -401,6 +452,10 @@ public class JUTElements {
 	setProjects(tmpProjects);
 
 	return tmpProjects;
+    }
+    
+    public JUTProjects initProjects(IJavaProject project) throws JUTWarning {
+	return initProjects(project, null);
     }
 
     public JUTClassesAndPackages initClassesAndPackages(ICompilationUnit cu)
@@ -421,6 +476,7 @@ public class JUTElements {
 	IPackageFragment testPackage = null;
 
 	String testClassPostfix = JUTPreferences.getTestClassPostfix();
+	String testProjectPostfix = JUTPreferences.getTestProjectPostfix();
 
 	if (cuList.size() == 0) {
 	    throw new JUTWarning(Messages.General_warning_nothing_selected);
@@ -458,6 +514,20 @@ public class JUTElements {
 	    testCuName = testCu.getElementName().replace(".java", "");
 	    baseCuName = testCu.getElementName().replace(
 		    testClassPostfix + ".java", "");
+
+	    if (basePackage == null) {
+		if (testPackage == null) {
+		    throw new JUTWarning(
+			    "The base and test package could not be found! Test-Class-Name: "
+				    + testCuName + " Base-Class-Name: "
+				    + baseCuName);
+		} else {
+		    throw new JUTWarning(
+			    "The base package could not be found! Test-package-name: "
+				    + testPackage.getElementName());
+		}
+	    }
+
 	    baseCu = basePackage.getCompilationUnit(baseCuName + ".java");
 	}
 
@@ -482,7 +552,7 @@ public class JUTElements {
 	    ICompilationUnit cu) throws JUTWarning, CoreException {
 	JUTElements jutElements = new JUTElements();
 
-	jutElements.initProjects(project);
+	jutElements.initProjects(project, cu);
 	jutElements.initClassesAndPackages(cu);
 
 	return jutElements;
@@ -505,19 +575,19 @@ public class JUTElements {
      * @return JUTClassesAndPackages the initialized packages
      * @throws CoreException
      */
-    private JUTClassesAndPackages initPackages(IPackageFragment pack)
-	    throws CoreException {
+    protected JUTClassesAndPackages initPackages(IPackageFragment pack)
+	    throws CoreException, JUTWarning {
 	JUTClassesAndPackages jutClassesAndPackages = new JUTClassesAndPackages();
-	IPackageFragment basePackage;
+	IPackageFragment basePackage = null;
 	IPackageFragment testPackage = null;
 
 	String testPackagePostfix = JUTPreferences.getTestPackagePostfix();
-
+	
 	String baseProjectName = "";
 	String basePackageName = "";
 	String testProjectName = "";
 	String testPackageName = "";
-
+	
 	if (projects.isBaseProjectSelected()) {
 	    baseProjectName = projects.getBaseProject().getElementName();
 	    basePackage = pack;
@@ -527,20 +597,22 @@ public class JUTElements {
 	    if (projects.getTestProject() != null) {
 		testProjectName = projects.getTestProject().getElementName();
 
-		// TODO gleiches package wie basepackage
-		if ("".equals(basePackageName)) {
+		if (testPackagePostfix.equals("")) {
+		    testPackageName = basePackageName;
+		}
+		else if ("".equals(basePackageName)) {
 		    testPackageName = testPackagePostfix;
 		} else if (basePackageName.startsWith(baseProjectName)) {
 		    testPackageName = basePackageName.replace(baseProjectName,
 			    testProjectName);
+		} else if (testPackagePostfix.equals("")) {
+		    testPackageName = basePackageName;
 		} else {
 		    testPackageName = basePackageName + "."
 			    + testPackagePostfix;
 		}
 
-		testPackageName = basePackageName;
-
-		testPackage = JDTUtils.getPackage(projects.getTestProject(),
+		testPackage = JDTUtils.getPackage(projects.getTestProject(), JUTPreferences.getTestSourceFolderName(),
 			testPackageName, false);
 	    }
 	} else {
@@ -549,27 +621,39 @@ public class JUTElements {
 	    testProjectName = projects.getTestProject().getElementName();
 	    testPackageName = testPackage.getElementName();
 
-	    // gleiches package wie testpackage
-	    basePackageName = testPackageName;
+	    if (testPackagePostfix.equals("")) {
+		basePackageName = testPackageName;
+	    } else if (testPackagePostfix.equals(testPackageName)) {
+		basePackageName = ""; // default package
+	    } else {
+		int lastIndexOf = testPackageName
+			.lastIndexOf(testPackagePostfix);
 
-	    basePackage = JDTUtils.getPackage(projects.getBaseProject(),
-		    basePackageName, false);
-
-	    // try with other name convention (not base package == test package)
-	    if (basePackage == null || !basePackage.exists()) {
-		if (testPackagePostfix.equals(testPackageName)) {
-		    basePackageName = ""; // default package
-		} else if (testPackageName.startsWith(testProjectName)) {
-		    basePackageName = testPackageName.replace(testProjectName,
-			    baseProjectName);
+		if (lastIndexOf < 0) {
+		    basePackageName = testPackageName.substring(0, lastIndexOf);
 		} else {
-		    basePackageName = testPackageName.replace("."
-			    + testPackagePostfix, "");
+		    throw new JUTWarning(
+			    "The base package could not be found! Test-package-name: "
+				    + testPackageName);
 		}
 
-		basePackage = JDTUtils.getPackage(projects.getBaseProject(),
-			basePackageName, false);
+		// this is a special option: the postfix is always like the
+		// test-project name and the rest of the base-package-name +
+		// test-package-postfix
+		// else if (testPackageName.startsWith(testProjectName)) {
+		// basePackageName = testPackageName.replace(testProjectName,
+		// baseProjectName);
+		// }
+
 	    }
+
+	    basePackage = JDTUtils.getPackage(projects.getBaseProject(), "src",
+		    basePackageName, false);
+	}
+
+	if (basePackage == null || !basePackage.exists()) {
+	    throw new JUTWarning(
+		    "The base package could not be found! The base-class was moved manually or the preferences are not correct.");
 	}
 
 	jutClassesAndPackages.setTestPackageName(testPackageName);
@@ -579,5 +663,4 @@ public class JUTElements {
 
 	return jutClassesAndPackages;
     }
-
 }

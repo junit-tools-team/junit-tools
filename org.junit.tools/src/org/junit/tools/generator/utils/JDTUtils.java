@@ -53,6 +53,7 @@ import org.junit.tools.base.JUTWarning;
 import org.junit.tools.generator.IGeneratorConstants;
 import org.junit.tools.generator.ITestDataFactory;
 import org.junit.tools.messages.Messages;
+import org.junit.tools.preferences.JUTPreferences;
 import org.junit.tools.ui.utils.EclipseUIUtils;
 
 /**
@@ -314,11 +315,25 @@ public class JDTUtils implements IGeneratorConstants {
 
     public static IPackageFragment getPackage(IJavaProject javaProject,
 	    String name, boolean createIfNotExists) throws CoreException {
+	return getPackage(javaProject, "src", name, createIfNotExists);
+    }
 
-	IFolder folder = javaProject.getProject().getFolder("src"); //$NON-NLS-1$
+    public static IPackageFragment getPackage(IJavaProject javaProject,
+	    String srcFolder, String name, boolean createIfNotExists)
+	    throws CoreException {
+	String srcFolderName = "";
+
+	if (srcFolder == null || "".equals(srcFolder)) {
+	    srcFolderName = "src";
+	} else {
+	    srcFolderName = srcFolder;
+	}
+
+	IFolder folder = javaProject.getProject().getFolder(srcFolderName);
+
 	if (!folder.exists()) {
 	    if (createIfNotExists) {
-		folder.create(true, true, null);
+		createSourceFolder(javaProject, folder);
 	    } else {
 		return null;
 	    }
@@ -328,14 +343,35 @@ public class JDTUtils implements IGeneratorConstants {
 	IPackageFragmentRoot parentFolder = javaProject
 		.getPackageFragmentRoot(folder);
 
-	IPackageFragment packageFragment = parentFolder
-		.getPackageFragment(name);
+	return getPackage(javaProject, parentFolder, name, createIfNotExists);
+    }
+
+    private static IPackageFragmentRoot createSourceFolder(
+	    IJavaProject javaProject, IFolder folder) throws CoreException {
+	folder.create(true, true, null);
+
+	// add new folder to class path
+	IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
+	IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
+	IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length + 1];
+	System.arraycopy(oldEntries, 0, newEntries, 0, oldEntries.length);
+	newEntries[oldEntries.length] = JavaCore.newSourceEntry(root.getPath());
+	javaProject.setRawClasspath(newEntries, null);
+
+	return root;
+
+    }
+
+    public static IPackageFragment getPackage(IJavaProject javaProject,
+	    IPackageFragmentRoot srcFolder, String name,
+	    boolean createIfNotExists) throws CoreException {
+	IPackageFragment packageFragment = srcFolder.getPackageFragment(name);
 	if (packageFragment == null || !packageFragment.exists()) {
 	    if (createIfNotExists) {
-		packageFragment = parentFolder.createPackageFragment(name,
-			true, null);
+		packageFragment = srcFolder.createPackageFragment(name, true,
+			null);
 	    } else {
-		packageFragment = parentFolder.getPackageFragment(name);
+		packageFragment = srcFolder.getPackageFragment(name);
 	    }
 	}
 
@@ -380,14 +416,15 @@ public class JDTUtils implements IGeneratorConstants {
     public static IPackageFragment createPackage(IJavaProject javaProject,
 	    String parentFolderName, String name) throws CoreException {
 	IFolder folder = javaProject.getProject().getFolder(parentFolderName);
+
+	IPackageFragmentRoot parentFolder = null;
 	if (!folder.exists()) {
-	    folder.create(true, true, null);
+	    parentFolder = createSourceFolder(javaProject, folder);
+	} else {
+	    parentFolder = javaProject.getPackageFragmentRoot(folder);
 	}
 
 	// create package fragment
-	IPackageFragmentRoot parentFolder = javaProject
-		.getPackageFragmentRoot(folder);
-
 	IPackageFragment packageFragment = parentFolder
 		.getPackageFragment(name);
 	if (packageFragment == null || !packageFragment.exists()) {
@@ -1733,6 +1770,16 @@ public class JDTUtils implements IGeneratorConstants {
 	}
 
 	return new Vector<IJavaElement>();
+    }
+
+    public static IFolder getTestSourceFolder(IJavaProject testProject) {
+	String testSourceFolderName = JUTPreferences.getTestSourceFolderName();
+
+	if (testSourceFolderName == null || "".equals(testSourceFolderName)) {
+	    testSourceFolderName = "src";
+	}
+
+	return testProject.getProject().getFolder(testSourceFolderName);
     }
 
 }

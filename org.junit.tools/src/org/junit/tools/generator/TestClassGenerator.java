@@ -172,8 +172,11 @@ public class TestClassGenerator implements ITestClassGenerator,
 	updateExistingMethods(type.getCompilationUnit(), type,
 		model.getExistingMethods());
 
+	// create the test-source-folder and -package
 	IPackageFragment testPackage = model.getJUTElements()
 		.getClassesAndPackages().getTestPackage();
+	
+	
 	testClass.createPackageDeclaration(testPackage.getElementName(), null);
 
 	// create static standard-imports
