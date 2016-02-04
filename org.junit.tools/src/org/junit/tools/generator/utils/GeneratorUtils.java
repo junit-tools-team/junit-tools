@@ -570,6 +570,9 @@ public class GeneratorUtils implements IGeneratorConstants {
     public static IMethod findMethod(Collection<IMethod> methods,
 	    MethodRef methodRef) throws JavaModelException {
 	boolean nameMatched;
+	IMethod nameMatchedMethod = null;
+	int nameMatchedCounter = 0;
+	
 	for (IMethod method : methods) {
 
 	    nameMatched = false;
@@ -592,12 +595,17 @@ public class GeneratorUtils implements IGeneratorConstants {
 		return method;
 	    }
 
-	    if (nameMatched && JDTUtils.isMethodNameUnique(method)) {
-		return method;
+	    if (nameMatched) {
+		nameMatchedCounter++;
+		nameMatchedMethod = method;
 	    }
 
 	}
 
+	if (nameMatchedCounter == 1) {
+	    return nameMatchedMethod;
+	}
+	
 	return null;
     }
 

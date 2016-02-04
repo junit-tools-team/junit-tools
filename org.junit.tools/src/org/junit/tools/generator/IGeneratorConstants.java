@@ -31,7 +31,7 @@ public interface IGeneratorConstants {
 
     public final static String QUOTES = "\"";
 
-    public static final String VERSION = "org.junit-tools-1.0.1";
+    public static final String VERSION = "org.junit-tools-1.0.2";
 
     public static final String ANNO_GENERATED_NAME = "Generated";
     public static final String ANNO_GENERATED = "@" + ANNO_GENERATED_NAME;
