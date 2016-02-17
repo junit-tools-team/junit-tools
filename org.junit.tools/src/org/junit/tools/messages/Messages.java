@@ -135,6 +135,7 @@ public class Messages extends NLS {
     public static String JUTPreferenceFilterPage_Name_filter;
 
     public static String JUTPreferenceMainPage_description_Main_settings;
+    public static String JUTPreferenceMainPage_Test_class_prefix;
     public static String JUTPreferenceMainPage_Test_class_postfix;
     public static String JUTPreferenceMainPage_Test_Method_postfix;
     public static String JUTPreferenceMainPage_Test_method_prefix;

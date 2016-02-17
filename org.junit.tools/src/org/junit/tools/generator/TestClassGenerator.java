@@ -84,6 +84,8 @@ public class TestClassGenerator implements ITestClassGenerator,
 
 	JUTClassesAndPackages utmClassesAndPackages = model.getJUTElements()
 		.getClassesAndPackages();
+	
+	utmClassesAndPackages.getTestPackage(true);
 	ICompilationUnit testClass = utmClassesAndPackages.getTestClass(true);
 	String testClassName = utmClassesAndPackages.getTestClassName();
 	ICompilationUnit baseClass = utmClassesAndPackages.getBaseClass();

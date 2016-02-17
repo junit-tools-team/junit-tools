@@ -22,7 +22,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.junit.tools.generator.model.JUTElements;
+import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
+import org.junit.tools.preferences.JUTPreferences;
+import org.junit.tools.ui.utils.EclipseUIUtils;
 
 /**
  * The default test-suites-generator
@@ -196,17 +199,25 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 
 	    @Override
 	    public void run(IProgressMonitor monitor) throws CoreException {
+		String testSourceFolderName = JUTPreferences.getTestSourceFolderName();
+		
+		for (IPackageFragmentRoot fragmentRoot : testProject
+			.getPackageFragmentRoots()) {
+		    if (testSourceFolderName.equals(fragmentRoot.getPath().lastSegment())) {
+			generateTestSuites(monitor, fragmentRoot);
+		    }
+		}
+		
+	    }
+
+	    private void generateTestSuites(IProgressMonitor monitor,
+		    IPackageFragmentRoot testFragmentRoot) throws JavaModelException, OperationCanceledException, CoreException {
 		List<TestSuiteDeclaration> testSuiteDeclarations = new ArrayList<TestSuiteDeclaration>();
 
 		TestSuiteDeclaration tsdTmp, tsdBefore = null;
 		String packageBefore = "";
 		IPackageFragment baseTestSuitePackage = null;
 		ICompilationUnit[] baseTestSuiteCuList = null;
-
-		IFolder testSourceFolder = JDTUtils
-			.getTestSourceFolder(testProject);
-		IPackageFragmentRoot testFragmentRoot = testProject
-			.getPackageFragmentRoot(testSourceFolder);
 
 		for (IJavaElement javaElement : testFragmentRoot.getChildren()) {
 
@@ -271,6 +282,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 			    baseTestSuitePackage, baseTestSuiteCuList,
 			    createRootTestSuiteNameList(testSuiteDeclarations));
 		}
+		
 	    }
 
 	}, null);
@@ -307,7 +319,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 	if (testSuiteFrame == null) {
 	    return;
 	}
-
+	
 	// save compilation-unit
 	testSuite.save(null, false);
 	testSuite.makeConsistent(null);
@@ -471,7 +483,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 	    testClassName = testClassNameWithClassSuffix.replace(".class", "");
 
 	    if (testClassName.equals(TESTSUITE_PREFIX)
-		    || !testClassName.endsWith("Test")) {
+		    || !isValidTestClassName(testClassName)) {
 		continue;
 	    }
 
@@ -505,6 +517,25 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 	}
 
 	return sb.toString();
+    }
+
+    private boolean isValidTestClassName(String testClassName) {
+	String testClassPrefix = JUTPreferences.getTestClassPrefix();
+	String testClassPostfix = JUTPreferences.getTestClassPostfix();
+
+	if (!"".equals(testClassPrefix)) {
+	    if (!testClassName.startsWith(testClassPrefix)) {
+		return false;
+	    }
+	}
+
+	if (!"".equals(testClassPostfix)) {
+	    if (!testClassName.endsWith(testClassPostfix)) {
+		return false;
+	    }
+	}
+
+	return true;
     }
 
     private boolean isExceptionClass(String testClassName,
@@ -561,9 +592,9 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 	return true;
     }
 
-    protected ICompilationUnit getTestSuite(IPackageFragment p) {
+    protected ICompilationUnit getTestSuite(IPackageFragment p)
+	    throws JavaModelException {
 	return p.getCompilationUnit(TESTSUITE_PREFIX + ".java");
-
     }
 
     private IType refreshTestSuiteElements(ICompilationUnit testSuite,
@@ -583,7 +614,9 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 		    + "\npublic class " + testSuiteType.getElementName()
 		    + "{ // nothing\n}", null, true, null);
 	} else {
-	    testSuite.delete(true, null);
+	    if (testSuite.exists()) {
+		testSuite.delete(true, null);
+	    }
 	    return null;
 	}
 

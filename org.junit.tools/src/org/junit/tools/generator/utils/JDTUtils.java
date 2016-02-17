@@ -6,6 +6,7 @@ import java.util.Vector;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -14,6 +15,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -77,17 +79,18 @@ public class JDTUtils implements IGeneratorConstants {
      * 
      * @param cu
      * @return CompilationUnit
+     * @throws JavaModelException
      */
-    public static CompilationUnit createASTRoot(ICompilationUnit cu) {
-	// creation of DOM/AST from a ICompilationUnit
-	if (lastParsedCu == cu) {
+    public static CompilationUnit createASTRoot(ICompilationUnit cu)
+	    throws JavaModelException {
+	// creation of DOM/AST from a ICompilationUnit (with caching)
+	if (lastParsedCu != null && lastParsedCu.getSource().length() == cu.getSource().length()) {
 	    return parsedCu;
-	} else {
-	    lastParsedCu = cu;
 	}
 
 	ASTParser parser = createASTParser(cu);
 	parsedCu = (CompilationUnit) parser.createAST(null);
+	lastParsedCu = cu;
 
 	return parsedCu;
     }
@@ -288,17 +291,13 @@ public class JDTUtils implements IGeneratorConstants {
 	return jProject;
     }
 
-    /**
-     * Creates a folder in the project.
-     * 
-     * @param jproject
-     * @param folderName
-     * @return created folder
-     */
     public static IFolder createFolder(IJavaProject jproject, String folderName) {
 	// folderName = folderName.replace(".", "/");
 	IFolder folder = jproject.getProject().getFolder(folderName);
+	return createFolder(jproject, folder);
+    }
 
+    private static IFolder createFolder(IJavaProject jproject, IFolder folder) {
 	try {
 	    if (!folder.exists()) {
 		folder.create(true, true, null);
@@ -316,6 +315,16 @@ public class JDTUtils implements IGeneratorConstants {
     public static IPackageFragment getPackage(IJavaProject javaProject,
 	    String name, boolean createIfNotExists) throws CoreException {
 	return getPackage(javaProject, "src", name, createIfNotExists);
+    }
+
+    public static IPackageFragment getPackage(IJavaProject javaProject,
+	    String name, IFolder srcFolder, boolean createIfNotExists)
+	    throws CoreException {
+	// create package fragment
+	IPackageFragmentRoot parentFolder = javaProject
+		.getPackageFragmentRoot(srcFolder);
+
+	return getPackage(javaProject, parentFolder, name, createIfNotExists);
     }
 
     public static IPackageFragment getPackage(IJavaProject javaProject,
@@ -339,15 +348,41 @@ public class JDTUtils implements IGeneratorConstants {
 	    }
 	}
 
-	// create package fragment
-	IPackageFragmentRoot parentFolder = javaProject
-		.getPackageFragmentRoot(folder);
+	return getPackage(javaProject, name, folder, createIfNotExists);
+    }
 
-	return getPackage(javaProject, parentFolder, name, createIfNotExists);
+    public static IPackageFragmentRoot createSourceFolder(
+	    IJavaProject javaProject, IPath folderPath) throws CoreException {
+	IFolder folder = javaProject.getProject().getFolder(folderPath);
+
+	if (!folder.exists()) {
+	    return createSourceFolder(javaProject, folder);
+	}
+
+	return javaProject.getPackageFragmentRoot(folder);
     }
 
     private static IPackageFragmentRoot createSourceFolder(
 	    IJavaProject javaProject, IFolder folder) throws CoreException {
+	
+	IContainer parent = folder.getParent();
+	if (parent instanceof IFolder && !parent.exists()) {
+	    IFolder parentFolder = (IFolder)folder.getParent();
+	    return createSourceFolder(javaProject, parentFolder, parentFolder.getFullPath());
+	}
+
+	return createSourceFolder(javaProject, folder, null);
+
+    }
+
+    private static IPackageFragmentRoot createSourceFolder(IJavaProject javaProject,
+	    IFolder folder, IPath parentPath) throws CoreException {
+	// for nested and new parent folders
+	if (parentPath != null) {
+	    IPath folderPath = folder.getFullPath().removeFirstSegments(parentPath.segmentCount());
+	    folder = javaProject.getProject().getFolder(folderPath);
+	}
+	
 	folder.create(true, true, null);
 
 	// add new folder to class path
@@ -359,7 +394,6 @@ public class JDTUtils implements IGeneratorConstants {
 	javaProject.setRawClasspath(newEntries, null);
 
 	return root;
-
     }
 
     public static IPackageFragment getPackage(IJavaProject javaProject,
@@ -1633,7 +1667,8 @@ public class JDTUtils implements IGeneratorConstants {
 	return false;
     }
 
-    public static IMethod getSelectedMethod(IFileEditorInput fileEditorInput) {
+    public static IMethod getSelectedMethod(IFileEditorInput fileEditorInput)
+	    throws JavaModelException {
 	ITextEditor editor = (ITextEditor) EclipseUIUtils.getActiveEditor();
 	ITextSelection sel = (ITextSelection) editor.getSelectionProvider()
 		.getSelection();
@@ -1645,6 +1680,9 @@ public class JDTUtils implements IGeneratorConstants {
 	NodeFinder finder = new NodeFinder(cu, sel.getOffset(), sel.getLength());
 
 	ASTNode node = finder.getCoveringNode();
+
+	NodeFinder.perform(cu, sel.getOffset(), sel.getLength());
+
 	MethodDeclaration methodDeclaration = getASTMethod(node);
 	if (methodDeclaration == null) {
 	    return null;
@@ -1770,16 +1808,6 @@ public class JDTUtils implements IGeneratorConstants {
 	}
 
 	return new Vector<IJavaElement>();
-    }
-
-    public static IFolder getTestSourceFolder(IJavaProject testProject) {
-	String testSourceFolderName = JUTPreferences.getTestSourceFolderName();
-
-	if (testSourceFolderName == null || "".equals(testSourceFolderName)) {
-	    testSourceFolderName = "src";
-	}
-
-	return testProject.getProject().getFolder(testSourceFolderName);
     }
 
 }

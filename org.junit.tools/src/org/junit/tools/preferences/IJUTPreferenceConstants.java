@@ -11,6 +11,7 @@ public interface IJUTPreferenceConstants {
     public static final String TEST_PROJECT_POSTFIX = "TEST_PROJECT_POSTFIX";
     public static final String TEST_SOURCE_FOLDER_NAME = "TEST_SOURCE_FOLDER_NAME";
     public static final String TEST_PACKAGE_POSTFIX = "TEST_PACKAGE_POSTFIX";
+    public static final String TEST_CLASS_PREFIX = "TEST_CLASS_PREFIX";
     public static final String TEST_CLASS_POSTFIX = "TEST_CLASS_POSTFIX";
     public static final String TEST_METHOD_PREFIX = "TEST_METHOD_PREFIX";
     public static final String TEST_METHOD_POSTFIX = "TEST_METHOD_POSTFIX";

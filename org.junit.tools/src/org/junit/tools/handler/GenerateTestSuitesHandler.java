@@ -29,7 +29,7 @@ public class GenerateTestSuitesHandler extends JUTHandler {
 	    IJavaProject testProject = JDTUtils.getProject(selection);
 
 	    MainController mc = new MainController();
-	    boolean result = mc.generateTestSuites(testProject);
+	    boolean result = mc.generateTestSuites(activeWorkbenchWindow, testProject);
 
 	    if (result) {
 		MessageDialog.openInformation(EclipseUIUtils.getShell(),

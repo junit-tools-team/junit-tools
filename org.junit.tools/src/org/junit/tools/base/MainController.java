@@ -34,7 +34,6 @@ import org.junit.tools.generator.model.JUTElements.JUTClassesAndPackages;
 import org.junit.tools.generator.model.JUTElements.JUTConstructorsAndMethods;
 import org.junit.tools.generator.model.JUTElements.JUTProjects;
 import org.junit.tools.generator.model.tml.Settings;
-import org.junit.tools.generator.model.tml.TMLProcessor;
 import org.junit.tools.generator.model.tml.Test;
 import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
@@ -134,28 +133,12 @@ public class MainController implements IGeneratorConstants {
 	}
 
 	try {
-
-	    IJavaProject testProject = projects.getTestProject();
-
 	    JUTClassesAndPackages classesAndPackages = jutElements
 		    .getClassesAndPackages();
-	    String testPackageName = classesAndPackages.getTestPackageName();
 	    String testClassName = classesAndPackages.getTestClassName();
 	    ICompilationUnit testClass = classesAndPackages.getTestClass();
 
-	    boolean writeTML = JUTPreferences.isWriteTML();
 	    Test tmlTest = null;
-
-	    // TODO old
-	    TMLProcessor tmlProcessor = null;
-	    if (writeTML) {
-		// get the TML-file
-		if (testClass != null && testClass.exists()) {
-		    tmlProcessor = new TMLProcessor(testProject,
-			    testPackageName, testClassName);
-		    tmlTest = tmlProcessor.readTmlFile();
-		}
-	    }
 
 	    // create the model
 	    final GeneratorModel model = new GeneratorModel(jutElements,
@@ -174,11 +157,6 @@ public class MainController implements IGeneratorConstants {
 		// only log the exception
 		logger.warning("Exception occured during the test-cases-generation! "
 			+ ex.getMessage());
-	    }
-
-	    if (writeTML) {
-		// update TML-file
-		tmlProcessor.writeTmlFile(model.getTmlTest());
 	    }
 
 	    // save and close opened test-class-file
@@ -463,7 +441,7 @@ public class MainController implements IGeneratorConstants {
 	this.error = error;
     }
 
-    public boolean generateTestSuites(IJavaProject testProject)
+    public boolean generateTestSuites(IWorkbenchWindow activeWorkbenchWindow, IJavaProject testProject)
 	    throws CoreException, JUTWarning {
 	if (testProject == null) {
 	    return false;
@@ -481,6 +459,21 @@ public class MainController implements IGeneratorConstants {
 		.getExtensionHandler().getTestSuitesGenerators()) {
 	    if (!testSuitesGenerator.generateTestSuites(testProject)) {
 		return false;
+	    } else {
+		// make source beautiful
+		IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
+			.getActivePart().getSite();
+
+		for (ICompilationUnit cu : testSuitesGenerator
+			.getGeneratedTestSuites()) {
+		    EclipseUIUtils.organizeImports(site, cu);
+		}
+		EclipseUIUtils.format(
+			site,
+			testSuitesGenerator.getGeneratedTestSuites().toArray(
+				new ICompilationUnit[testSuitesGenerator
+					.getGeneratedTestSuites().size()]));
+
 	    }
 	}
 
@@ -519,9 +512,9 @@ public class MainController implements IGeneratorConstants {
     }
 
     private boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
-	    JUTElements uTMElements) throws JUTException, JUTWarning,
+	    JUTElements jutElements) throws JUTException, JUTWarning,
 	    JavaModelException {
-	JUTConstructorsAndMethods constructorsAndMethods = uTMElements
+	JUTConstructorsAndMethods constructorsAndMethods = jutElements
 		.getConstructorsAndMethods();
 	if (constructorsAndMethods == null) {
 	    throw new JUTWarning(
@@ -529,10 +522,10 @@ public class MainController implements IGeneratorConstants {
 			    + "Elsewise create an issue or contact the JUnit-Tools-Team.");
 	}
 
-	IMethod selectedMethod = uTMElements.getConstructorsAndMethods()
+	IMethod selectedMethod = jutElements.getConstructorsAndMethods()
 		.getSelectedMethod();
-	JUTProjects projects = uTMElements.getProjects();
-	JUTClassesAndPackages classesAndPackages = uTMElements
+	JUTProjects projects = jutElements.getProjects();
+	JUTClassesAndPackages classesAndPackages = jutElements
 		.getClassesAndPackages();
 	ICompilationUnit classToOpen;
 	Shell shell = activeWorkbenchWindow.getShell();
@@ -573,7 +566,7 @@ public class MainController implements IGeneratorConstants {
 				"No existing test-class found (perhaps the configuration is wrong). Would you like to generate a new test-class?");
 
 		if (result) {
-		    generateTestclass(activeWorkbenchWindow, uTMElements);
+		    generateTestclass(activeWorkbenchWindow, jutElements);
 		}
 	    } else {
 		return false;

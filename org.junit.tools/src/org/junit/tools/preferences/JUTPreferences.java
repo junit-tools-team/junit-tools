@@ -35,6 +35,8 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 
     private static String testClassSuperType = null;
 
+    private static String testClassPrefix = null;
+    
     private static String testClassPostfix = null;
 
     private static String mockProject = null;
@@ -223,6 +225,9 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 			} else if (event.getProperty() == TEST_CLASS_SUPER_TYPE) {
 			    setTestClassSuperType((String) event.getNewValue());
 			    return;
+			} else if (event.getProperty() == TEST_CLASS_PREFIX) {
+			    setTestClassPrefix((String) event.getNewValue());
+			    return;
 			} else if (event.getProperty() == TEST_CLASS_POSTFIX) {
 			    setTestClassPostfix((String) event.getNewValue());
 			    return;
@@ -246,6 +251,17 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 	return testPackagePostfix;
     }
 
+    protected static void setTestClassPrefix(String newValue) {
+	JUTPreferences.testClassPrefix= newValue;
+    }
+
+    public static String getTestClassPrefix() {
+	if (testClassPrefix == null) {
+	    testClassPrefix= getPreference(TEST_CLASS_PREFIX);
+	}
+	return testClassPrefix;
+    }
+    
     protected static void setTestClassPostfix(String newValue) {
 	JUTPreferences.testClassPostfix = newValue;
     }
