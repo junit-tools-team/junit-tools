@@ -48,7 +48,7 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
  * 
  * TODO move the logic to the handler classes.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public class MainController implements IGeneratorConstants {
 
@@ -441,8 +441,8 @@ public class MainController implements IGeneratorConstants {
 	this.error = error;
     }
 
-    public boolean generateTestSuites(IWorkbenchWindow activeWorkbenchWindow, IJavaProject testProject)
-	    throws CoreException, JUTWarning {
+    public boolean generateTestSuites(IWorkbenchWindow activeWorkbenchWindow,
+	    IJavaProject testProject) throws CoreException, JUTWarning {
 	if (testProject == null) {
 	    return false;
 	}

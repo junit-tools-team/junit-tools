@@ -9,7 +9,7 @@ import org.junit.tools.generator.model.GeneratorModel;
 /**
  * Interface for the test-class-generators.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public interface ITestClassGenerator {
     /**

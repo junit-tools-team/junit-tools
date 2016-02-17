@@ -36,9 +36,8 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
  * The base generator for mock-classes based on a other class and the
  * mock-framework jmockit.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
- *         TODO generate with AST
  */
 public class MockClassGenerator implements IMockClassGenerator,
 	IGeneratorConstants {

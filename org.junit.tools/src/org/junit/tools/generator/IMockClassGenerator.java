@@ -10,7 +10,7 @@ import org.junit.tools.base.JUTWarning;
 /**
  * Interface for the mock-class-generators.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public interface IMockClassGenerator {

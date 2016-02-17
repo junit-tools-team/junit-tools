@@ -38,7 +38,7 @@ import org.junit.tools.generator.utils.JDTUtils;
 /**
  * The test-cases-generator. It's only a beta version.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class TestCasesGenerator {

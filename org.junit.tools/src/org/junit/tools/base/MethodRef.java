@@ -6,7 +6,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * Class implementation for the method-reference annotation.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class MethodRef {

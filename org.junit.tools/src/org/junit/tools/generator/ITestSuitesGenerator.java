@@ -11,7 +11,7 @@ import org.junit.tools.generator.model.JUTElements;
 /**
  * Interface for the test-suites-generators.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public interface ITestSuitesGenerator {
 

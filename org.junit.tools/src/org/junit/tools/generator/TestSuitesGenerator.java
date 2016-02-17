@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -22,17 +21,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.junit.tools.generator.model.JUTElements;
-import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
 import org.junit.tools.preferences.JUTPreferences;
-import org.junit.tools.ui.utils.EclipseUIUtils;
 
 /**
  * The default test-suites-generator
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
- *         TODO generate with AST
  */
 public class TestSuitesGenerator implements ITestSuitesGenerator {
 
@@ -199,19 +195,23 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 
 	    @Override
 	    public void run(IProgressMonitor monitor) throws CoreException {
-		String testSourceFolderName = JUTPreferences.getTestSourceFolderName();
-		
+		String testSourceFolderName = JUTPreferences
+			.getTestSourceFolderName();
+
 		for (IPackageFragmentRoot fragmentRoot : testProject
 			.getPackageFragmentRoots()) {
-		    if (testSourceFolderName.equals(fragmentRoot.getPath().lastSegment())) {
+		    if (testSourceFolderName.equals(fragmentRoot.getPath()
+			    .lastSegment())) {
 			generateTestSuites(monitor, fragmentRoot);
 		    }
 		}
-		
+
 	    }
 
 	    private void generateTestSuites(IProgressMonitor monitor,
-		    IPackageFragmentRoot testFragmentRoot) throws JavaModelException, OperationCanceledException, CoreException {
+		    IPackageFragmentRoot testFragmentRoot)
+		    throws JavaModelException, OperationCanceledException,
+		    CoreException {
 		List<TestSuiteDeclaration> testSuiteDeclarations = new ArrayList<TestSuiteDeclaration>();
 
 		TestSuiteDeclaration tsdTmp, tsdBefore = null;
@@ -282,7 +282,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 			    baseTestSuitePackage, baseTestSuiteCuList,
 			    createRootTestSuiteNameList(testSuiteDeclarations));
 		}
-		
+
 	    }
 
 	}, null);
@@ -319,7 +319,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 	if (testSuiteFrame == null) {
 	    return;
 	}
-	
+
 	// save compilation-unit
 	testSuite.save(null, false);
 	testSuite.makeConsistent(null);

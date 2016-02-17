@@ -3,7 +3,7 @@ package org.junit.tools.generator;
 /**
  * General constants for the generators.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public interface IGeneratorConstants {
 

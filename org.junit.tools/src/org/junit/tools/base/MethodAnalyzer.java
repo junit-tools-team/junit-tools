@@ -27,7 +27,7 @@ import org.junit.tools.generator.utils.JDTUtils;
  * Analyzer for a base method. The result can be used for test-case generations
  * and test-reports.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class MethodAnalyzer {

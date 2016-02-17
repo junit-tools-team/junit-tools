@@ -54,9 +54,8 @@ import org.junit.tools.preferences.JUTPreferences;
  * The default test-class java generator. On the base of the TML the test-class
  * will be generated.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
- *         TODO generate with AST
  */
 @SuppressWarnings("restriction")
 // TODO avoid restrictions

@@ -23,7 +23,7 @@ import org.junit.tools.generator.TestSuitesGenerator;
 /**
  * Handles all extension points of the junit-tools
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class ExtensionPointHandler {

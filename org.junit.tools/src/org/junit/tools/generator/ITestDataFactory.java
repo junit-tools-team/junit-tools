@@ -6,7 +6,7 @@ import org.eclipse.jdt.core.IType;
  * Interface for a test-data-factory. With a test-data-factory a special
  * creation-code can be added for special types.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public interface ITestDataFactory {

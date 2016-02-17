@@ -3,7 +3,7 @@ package org.junit.tools.base;
 /**
  * Exception-class for warnings.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public class JUTWarning extends Exception {
 

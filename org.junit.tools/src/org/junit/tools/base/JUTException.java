@@ -5,7 +5,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 /**
  * Exception-class for errors.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public class JUTException extends Exception {
 
