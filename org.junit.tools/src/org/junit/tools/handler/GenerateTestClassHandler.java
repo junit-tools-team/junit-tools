@@ -20,7 +20,7 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
  * Command for the generation of a test-class. The standard shortcut is
  * ctrl-shift-<.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class GenerateTestClassHandler extends JUTHandler {

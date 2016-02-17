@@ -18,7 +18,7 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
  * Command for the switch-function between test-class and test-subject. The
  * standard shortcut is ctrl-shift-y.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class SwitchClassHandler extends JUTHandler {

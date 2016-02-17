@@ -21,7 +21,7 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
 /**
  * Command implementation for the mock-class-generator
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class GenerateMockClassHandler extends JUTHandler {

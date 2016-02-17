@@ -39,7 +39,7 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
 /**
  * The controller for the main page.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class GeneratorWizardMain extends GeneratorWizardBase implements

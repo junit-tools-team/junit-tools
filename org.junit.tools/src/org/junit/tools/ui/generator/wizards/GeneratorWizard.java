@@ -12,7 +12,7 @@ import org.junit.tools.ui.generator.wizards.pages.GeneratorWizardMainPage;
 /**
  * Main-class for the generator wizard.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class GeneratorWizard extends Wizard implements INewWizard {

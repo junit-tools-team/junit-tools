@@ -8,7 +8,7 @@ import org.junit.tools.base.ExtensionPointHandler;
 /**
  * Initializer for the junit-tools-preference-values.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public class JUTPreferenceInitializer extends AbstractPreferenceInitializer
 	implements IJUTPreferenceConstants {

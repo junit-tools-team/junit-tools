@@ -3,9 +3,9 @@ package org.junit.tools.messages;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Messages for junit-tools.
+ * Messages for JUnit-Tools.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class Messages extends NLS {

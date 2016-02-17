@@ -14,7 +14,7 @@ import org.junit.tools.ui.generator.wizards.GeneratorWizardMain;
 /**
  * The page for the method-selection and the main settings.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class GeneratorWizardMainPage extends GeneratorWizardBasePage {

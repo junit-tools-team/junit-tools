@@ -554,7 +554,7 @@ public class JUTElements {
 	} else {
 	    testCu = cuList.get(0);
 	    testPackage = jutClassesAndPackages.getTestPackage();
-	    
+
 	    testCuName = testCu.getElementName().replace(".java", "");
 	    baseCuName = testCu.getElementName().replace(
 		    testClassPostfix + ".java", "");

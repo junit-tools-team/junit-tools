@@ -83,7 +83,7 @@ public class TestClassGenerator implements ITestClassGenerator,
 
 	JUTClassesAndPackages utmClassesAndPackages = model.getJUTElements()
 		.getClassesAndPackages();
-	
+
 	utmClassesAndPackages.getTestPackage(true);
 	ICompilationUnit testClass = utmClassesAndPackages.getTestClass(true);
 	String testClassName = utmClassesAndPackages.getTestClassName();
@@ -176,8 +176,7 @@ public class TestClassGenerator implements ITestClassGenerator,
 	// create the test-source-folder and -package
 	IPackageFragment testPackage = model.getJUTElements()
 		.getClassesAndPackages().getTestPackage();
-	
-	
+
 	testClass.createPackageDeclaration(testPackage.getElementName(), null);
 
 	// create static standard-imports

@@ -15,6 +15,12 @@ import org.junit.tools.generator.IGeneratorConstants;
 import org.junit.tools.messages.Messages;
 import org.junit.tools.ui.utils.EclipseUIUtils;
 
+/**
+ * General JUT handler 
+ * 
+ * @author JUnit-Tools-Team
+ *
+ */
 public abstract class JUTHandler implements IHandler {
 
     protected static ILog log = Activator.getLogger();

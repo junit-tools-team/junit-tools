@@ -48,7 +48,7 @@ import org.junit.tools.messages.Messages;
  * Utils for the selection and manipulation of java-elements with the Eclipse
  * UI.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class EclipseUIUtils {

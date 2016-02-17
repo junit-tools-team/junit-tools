@@ -10,6 +10,12 @@ import org.junit.tools.base.MainController;
 import org.junit.tools.messages.Messages;
 import org.junit.tools.ui.utils.EclipseUIUtils;
 
+/**
+ * Create necessary tests report handler
+ * 
+ * @author JUnit-Tools-Team
+ *
+ */
 public class CreateNecessaryTestsReportHandler extends JUTHandler {
 
     @Override

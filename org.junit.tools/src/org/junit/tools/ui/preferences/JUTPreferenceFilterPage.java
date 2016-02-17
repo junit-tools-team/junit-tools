@@ -22,7 +22,7 @@ import org.junit.tools.preferences.JUTPreferences;
 /**
  * The page for the filter preferences.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class JUTPreferenceFilterPage extends PreferencePage implements

@@ -54,7 +54,7 @@ import org.junit.tools.reports.model.Statistics;
  * It searches after all methods with logic and no junit-tests. New methods are
  * listed in a special block. A statistic on method layer is included too.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 // TODO refactor

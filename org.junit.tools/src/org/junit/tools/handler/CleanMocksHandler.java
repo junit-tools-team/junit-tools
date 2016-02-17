@@ -17,6 +17,12 @@ import org.junit.tools.generator.utils.JDTUtils;
 import org.junit.tools.messages.Messages;
 import org.junit.tools.ui.utils.EclipseUIUtils;
 
+/**
+ * Clean mocks handler
+ * 
+ * @author JUnit-Tools-Team
+ * 
+ */
 public class CleanMocksHandler extends JUTHandler {
 
     @Override

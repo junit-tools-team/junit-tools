@@ -10,7 +10,7 @@ import org.junit.tools.Activator;
 /**
  * Preference-class for the junit-tools-processing.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class JUTPreferences implements IJUTPreferenceConstants {
@@ -26,7 +26,7 @@ public class JUTPreferences implements IJUTPreferenceConstants {
     private static String testProjectPostfix = null;
 
     private static String testSourceFolderName = null;
-    
+
     private static String testPackagePostfix = null;
 
     private static String testMethodPrefix = null;
@@ -36,7 +36,7 @@ public class JUTPreferences implements IJUTPreferenceConstants {
     private static String testClassSuperType = null;
 
     private static String testClassPrefix = null;
-    
+
     private static String testClassPostfix = null;
 
     private static String mockProject = null;
@@ -85,7 +85,7 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 	}
 	return testSourceFolderName;
     }
-    
+
     public static String getTestMethodPostfix() {
 	if (testMethodPostfix == null) {
 	    testMethodPostfix = getPreference(TEST_METHOD_POSTFIX);
@@ -127,7 +127,7 @@ public class JUTPreferences implements IJUTPreferenceConstants {
     protected static void setTestProjectPostfix(String testProjectPostfixPref) {
 	JUTPreferences.testProjectPostfix = testProjectPostfixPref;
     }
-    
+
     protected static void setTestSourceFolderName(String testSourceFolderName) {
 	JUTPreferences.testSourceFolderName = testSourceFolderName;
     }
@@ -200,10 +200,10 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 			    setTestProjectPostfix((String) event.getNewValue());
 			    return;
 			} else if (event.getProperty() == TEST_SOURCE_FOLDER_NAME) {
-			    setTestSourceFolderName((String) event.getNewValue());
+			    setTestSourceFolderName((String) event
+				    .getNewValue());
 			    return;
-			}  
-			else if (event.getProperty() == TML_CONTAINER) {
+			} else if (event.getProperty() == TML_CONTAINER) {
 			    setTmlContainer((String) event.getNewValue());
 			    return;
 			} else if (event.getProperty() == WRITE_TML) {
@@ -252,16 +252,16 @@ public class JUTPreferences implements IJUTPreferenceConstants {
     }
 
     protected static void setTestClassPrefix(String newValue) {
-	JUTPreferences.testClassPrefix= newValue;
+	JUTPreferences.testClassPrefix = newValue;
     }
 
     public static String getTestClassPrefix() {
 	if (testClassPrefix == null) {
-	    testClassPrefix= getPreference(TEST_CLASS_PREFIX);
+	    testClassPrefix = getPreference(TEST_CLASS_PREFIX);
 	}
 	return testClassPrefix;
     }
-    
+
     protected static void setTestClassPostfix(String newValue) {
 	JUTPreferences.testClassPostfix = newValue;
     }

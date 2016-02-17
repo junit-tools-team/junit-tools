@@ -17,7 +17,7 @@ import org.junit.tools.preferences.IJUTPreferenceConstants;
 /**
  * The page for the main preferences.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
@@ -160,7 +160,7 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 	    }
 	};
 	addField(fieldClassPre);
-	
+
 	// class postfix
 	fieldClassPost = new StringFieldEditor(TEST_CLASS_POSTFIX,
 		Messages.JUTPreferenceMainPage_Test_class_postfix,
@@ -311,7 +311,8 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 
     protected void setExampleValueClass() {
 
-	if ("".equals(fieldClassPre.getStringValue()) && "".equals(fieldClassPost.getStringValue())) {
+	if ("".equals(fieldClassPre.getStringValue())
+		&& "".equals(fieldClassPost.getStringValue())) {
 	    classIsEqual = true;
 
 	    if (projectIsEqual && srcFolderIsEqual && packageIsEqual) {
@@ -324,7 +325,9 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 	    classIsEqual = false;
 
 	    classExample
-		    .setText("If the class under test is \"Calculator\" the test class is \"" + fieldClassPre.getStringValue() + "Calculator"
+		    .setText("If the class under test is \"Calculator\" the test class is \""
+			    + fieldClassPre.getStringValue()
+			    + "Calculator"
 			    + fieldClassPost.getStringValue() + "\"");
 	}
 
@@ -353,16 +356,16 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 	    String methodName = "";
 	    if (fieldMethodPre.getStringValue().equals("")) {
 		methodName = "calculate";
-	    }
-	    else {
+	    } else {
 		methodName = "Calculate";
 	    }
-	    
+
 	    methodExample
 		    .setText("If the method under test is \"calculate\" the test method is \""
 			    + fieldMethodPre.getStringValue()
 			    + methodName
-			    + GeneratorUtils.firstCharToUpper(fieldMethodPost.getStringValue()) + "\"");
+			    + GeneratorUtils.firstCharToUpper(fieldMethodPost
+				    .getStringValue()) + "\"");
 	}
 
 	methodExample.getParent().layout();
@@ -371,11 +374,10 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 
     private void checkValid() {
 	if (projectIsEqual && srcFolderIsEqual && packageIsEqual
-		    && classIsEqual && methodIsEqual) {
-		setErrorMessage("There must be a difference between the elements under test and the corresponding test elements!");
-		setValid(false);
-	}
-	else {
+		&& classIsEqual && methodIsEqual) {
+	    setErrorMessage("There must be a difference between the elements under test and the corresponding test elements!");
+	    setValid(false);
+	} else {
 	    // reset error message
 	    setErrorMessage(null);
 	    setValid(true);
@@ -384,7 +386,7 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 
     protected void setExampleValueSuperType() {
 	checkValid();
-	
+
 	if ("".equals(fieldSuperType.getStringValue())) {
 	    superTypeExample
 		    .setText("There is no super type defined for the test class");

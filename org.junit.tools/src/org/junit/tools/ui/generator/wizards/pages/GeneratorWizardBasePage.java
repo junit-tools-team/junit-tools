@@ -7,7 +7,7 @@ import org.junit.tools.ui.generator.wizards.GeneratorWizardBase;
 /**
  * Base class for the wizard pages.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public abstract class GeneratorWizardBasePage extends WizardPage {

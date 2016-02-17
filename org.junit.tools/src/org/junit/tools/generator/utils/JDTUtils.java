@@ -381,7 +381,7 @@ public class JDTUtils implements IGeneratorConstants {
 	    IPath folderPath = folder.getFullPath().removeFirstSegments(parentPath.segmentCount());
 	    folder = javaProject.getProject().getFolder(folderPath);
 	}
-	
+
 	folder.create(true, true, null);
 
 	// add new folder to class path

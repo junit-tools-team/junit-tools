@@ -1,9 +1,9 @@
 package org.junit.tools.preferences;
 
 /**
- * Constants for the junit-tools-preferences.
+ * Constants for the JUnit-Tools-preferences.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public interface IJUTPreferenceConstants {

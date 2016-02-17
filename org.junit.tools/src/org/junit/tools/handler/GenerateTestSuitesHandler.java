@@ -13,6 +13,12 @@ import org.junit.tools.generator.utils.JDTUtils;
 import org.junit.tools.messages.Messages;
 import org.junit.tools.ui.utils.EclipseUIUtils;
 
+/**
+ * Generate test suites handler
+ * 
+ * @author JUnit-Tools-Team
+ * 
+ */
 public class GenerateTestSuitesHandler extends JUTHandler {
 
     @Override
@@ -29,7 +35,8 @@ public class GenerateTestSuitesHandler extends JUTHandler {
 	    IJavaProject testProject = JDTUtils.getProject(selection);
 
 	    MainController mc = new MainController();
-	    boolean result = mc.generateTestSuites(activeWorkbenchWindow, testProject);
+	    boolean result = mc.generateTestSuites(activeWorkbenchWindow,
+		    testProject);
 
 	    if (result) {
 		MessageDialog.openInformation(EclipseUIUtils.getShell(),
