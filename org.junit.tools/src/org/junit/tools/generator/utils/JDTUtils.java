@@ -82,14 +82,14 @@ public class JDTUtils implements IGeneratorConstants {
      */
     public static CompilationUnit createASTRoot(ICompilationUnit cu)
 	    throws JavaModelException {
-	// creation of DOM/AST from a ICompilationUnit (with caching)
-	if (lastParsedCu != null && lastParsedCu.getSource().length() == cu.getSource().length()) {
-	    return parsedCu;
-	}
+	// creation of DOM/AST from a ICompilationUnit (without caching)
+//	if (lastParsedCu != null && lastParsedCu.getSource().length() == cu.getSource().length()) {
+//	    return parsedCu;
+//	}
+//	lastParsedCu = cu;
 
 	ASTParser parser = createASTParser(cu);
 	parsedCu = (CompilationUnit) parser.createAST(null);
-	lastParsedCu = cu;
 
 	return parsedCu;
     }
@@ -1679,8 +1679,6 @@ public class JDTUtils implements IGeneratorConstants {
 	NodeFinder finder = new NodeFinder(cu, sel.getOffset(), sel.getLength());
 
 	ASTNode node = finder.getCoveringNode();
-
-	NodeFinder.perform(cu, sel.getOffset(), sel.getLength());
 
 	MethodDeclaration methodDeclaration = getASTMethod(node);
 	if (methodDeclaration == null) {
