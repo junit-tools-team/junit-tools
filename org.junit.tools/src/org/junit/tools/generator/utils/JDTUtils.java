@@ -55,14 +55,13 @@ import org.junit.tools.base.JUTWarning;
 import org.junit.tools.generator.IGeneratorConstants;
 import org.junit.tools.generator.ITestDataFactory;
 import org.junit.tools.messages.Messages;
-import org.junit.tools.preferences.JUTPreferences;
 import org.junit.tools.ui.utils.EclipseUIUtils;
 
 /**
  * Utils for the selection, creation, manipulation and deletion of java-elements
  * with the jdt framework.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class JDTUtils implements IGeneratorConstants {

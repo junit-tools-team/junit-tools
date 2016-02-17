@@ -26,7 +26,7 @@ import org.junit.tools.preferences.JUTPreferences;
  * This class provides help methods for the generation of test- and
  * mock-classes.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  * 
  */
 public class GeneratorUtils implements IGeneratorConstants {
