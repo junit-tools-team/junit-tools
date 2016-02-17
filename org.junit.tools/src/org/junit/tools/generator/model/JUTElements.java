@@ -743,15 +743,27 @@ public class JUTElements {
 	IJavaElement parent = testPackage.getParent();
 
 	List<IPackageFragmentRoot> baseSourceFolders = new ArrayList<IPackageFragmentRoot>();
-	if (parent instanceof IPackageFragmentRoot) {
-	    IPackageFragmentRoot testRoot = (IPackageFragmentRoot) parent;
-	    IPath basePath = testRoot.getPath().removeLastSegments(1);
-	    basePath = basePath.append("src");
 
+	// only if same project use different source folders
+	if (baseProject.getElementName().equals(
+		testPackage.getJavaProject().getElementName())) {
+	    if (parent instanceof IPackageFragmentRoot) {
+		IPackageFragmentRoot testRoot = (IPackageFragmentRoot) parent;
+		IPath basePath = testRoot.getPath().removeLastSegments(1);
+		basePath = basePath.append("src");
+
+		for (IPackageFragmentRoot root : baseProject
+			.getPackageFragmentRoots()) {
+		    if (root.getPath().matchingFirstSegments(basePath) == basePath
+			    .segmentCount()) {
+			baseSourceFolders.add(root);
+		    }
+		}
+	    }
+	} else {
 	    for (IPackageFragmentRoot root : baseProject
 		    .getPackageFragmentRoots()) {
-		if (root.getPath().matchingFirstSegments(basePath) == basePath
-			.segmentCount()) {
+		if (root.getPath().lastSegment().equals("src")) {
 		    baseSourceFolders.add(root);
 		}
 	    }
