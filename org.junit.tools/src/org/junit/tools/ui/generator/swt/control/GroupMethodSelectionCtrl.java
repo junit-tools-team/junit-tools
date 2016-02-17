@@ -300,10 +300,10 @@ public class GroupMethodSelectionCtrl implements IGeneratorConstants {
     }
 
     private void initReal(GroupMethodSelectionView grp,
-	    IJavaElement javaElement, GeneratorModel utmModel)
+	    IJavaElement javaElement, GeneratorModel jutModel)
 	    throws JavaModelException {
 	this.group = grp;
-	this.model = utmModel;
+	this.model = jutModel;
 	this.treeClass = javaElement;
 
 	if (viewerFilterMethods == null) {

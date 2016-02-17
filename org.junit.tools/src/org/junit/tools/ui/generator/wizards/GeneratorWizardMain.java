@@ -255,12 +255,9 @@ public class GeneratorWizardMain extends GeneratorWizardBase implements
 
 	GeneratorWizardMainPage page = getPage();
 	Test tmlTest = getModel().getTmlTest();
-	List<Method> tmlMethods = null;
 	initDefaults(page);
 
 	if (tmlTest != null) {
-	    tmlMethods = tmlTest.getMethod();
-
 	    // initialize settings
 	    initPageSettings(page, tmlTest.getSettings());
 
@@ -273,14 +270,8 @@ public class GeneratorWizardMain extends GeneratorWizardBase implements
 	addListener(page);
 
 	try {
-	    boolean writeTML = JUTPreferences.isWriteTML();
-	    if (writeTML) {
-		methodSelection.init(page.getView().getMethodSelectionGroup(),
-			testBase, tmlMethods, getModel());
-	    } else {
-		methodSelection.init(page.getView().getMethodSelectionGroup(),
-			testBase, testClass, getModel());
-	    }
+	    methodSelection.init(page.getView().getMethodSelectionGroup(),
+		    testBase, testClass, getModel());
 
 	    methodSelectionChanged(methodSelection.getCheckedMethods());
 	    methodSelection.deactivateFilters();

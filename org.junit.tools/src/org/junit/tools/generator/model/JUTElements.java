@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 import org.junit.tools.base.JUTWarning;
 import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
@@ -25,7 +24,7 @@ import org.junit.tools.preferences.JUTPreferences;
  * Class for the junit-tools-elements: project, package and class from the base
  * and test.
  * 
- * @author Robert Streng
+ * @author JUnit-Tools-Team
  */
 public class JUTElements {
 
@@ -739,34 +738,45 @@ public class JUTElements {
 
     private List<IPackageFragmentRoot> getBaseSourceFolders(
 	    IJavaProject baseProject, IPackageFragment testPackage)
-	    throws JavaModelException {
+	    throws CoreException {
 	IJavaElement parent = testPackage.getParent();
 
 	List<IPackageFragmentRoot> baseSourceFolders = new ArrayList<IPackageFragmentRoot>();
 
 	// only if same project use different source folders
-	if (baseProject.getElementName().equals(
-		testPackage.getJavaProject().getElementName())) {
-	    if (parent instanceof IPackageFragmentRoot) {
-		IPackageFragmentRoot testRoot = (IPackageFragmentRoot) parent;
-		IPath basePath = testRoot.getPath().removeLastSegments(1);
-		basePath = basePath.append("src");
+	if (parent instanceof IPackageFragmentRoot) {
+	    IPackageFragmentRoot testRoot = (IPackageFragmentRoot) parent;
 
-		for (IPackageFragmentRoot root : baseProject
-			.getPackageFragmentRoots()) {
-		    if (root.getPath().matchingFirstSegments(basePath) == basePath
-			    .segmentCount()) {
-			baseSourceFolders.add(root);
-		    }
-		}
-	    }
-	} else {
+	    IPath basePath = null;
+
+	    // delete project path segment
+	    IPath testPath = testRoot.getPath();
+	    IPath onlyFolderPath = testPath.removeFirstSegments(1);
+
+	    // delete test source folder segment
+	    onlyFolderPath = onlyFolderPath.removeLastSegments(1);
+	    
+	    // add default source folder name for base
+	    basePath = onlyFolderPath.append("src");
+
+	    // search for relevant folders
+	    IPath pathToCompare;
 	    for (IPackageFragmentRoot root : baseProject
 		    .getPackageFragmentRoots()) {
-		if (root.getPath().lastSegment().equals("src")) {
+		pathToCompare = root.getPath().removeFirstSegments(1);
+		
+		if (pathToCompare.matchingFirstSegments(basePath) == basePath
+			.segmentCount()) {
 		    baseSourceFolders.add(root);
 		}
 	    }
+
+	}
+
+	// set default source folder
+	if (baseSourceFolders.size() == 0) {
+	    IFolder folder = baseProject.getProject().getFolder("src");
+	    baseSourceFolders.add(baseProject.getPackageFragmentRoot(folder));
 	}
 
 	return baseSourceFolders;

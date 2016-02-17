@@ -361,28 +361,42 @@ public class JDTUtils implements IGeneratorConstants {
 	return javaProject.getPackageFragmentRoot(folder);
     }
 
-    private static IPackageFragmentRoot createSourceFolder(
+    public static IPackageFragmentRoot createSourceFolder(
 	    IJavaProject javaProject, IFolder folder) throws CoreException {
 	
-	IContainer parent = folder.getParent();
-	if (parent instanceof IFolder && !parent.exists()) {
-	    IFolder parentFolder = (IFolder)folder.getParent();
-	    return createSourceFolder(javaProject, parentFolder, parentFolder.getFullPath());
+	IPath fullPath = folder.getFullPath();
+	
+	fullPath = fullPath.removeFirstSegments(1); // without project
+	
+	IFolder tmpFolder = null;
+	for (String segment : fullPath.segments()) {
+	    // nested folders
+	    if (tmpFolder != null) {
+		tmpFolder = tmpFolder.getFolder(segment);
+	    }
+	    else {
+		tmpFolder = javaProject.getProject().getFolder(segment);
+	    }
+	    
+	    if (!tmpFolder.exists()) {
+		tmpFolder.create(true, true, null);
+	    }
 	}
 
-	return createSourceFolder(javaProject, folder, null);
-
+	return createSourceFolder(javaProject, tmpFolder, null);
     }
 
     private static IPackageFragmentRoot createSourceFolder(IJavaProject javaProject,
 	    IFolder folder, IPath parentPath) throws CoreException {
-	// for nested and new parent folders
-	if (parentPath != null) {
-	    IPath folderPath = folder.getFullPath().removeFirstSegments(parentPath.segmentCount());
-	    folder = javaProject.getProject().getFolder(folderPath);
+	// create default folder
+	if (folder == null) {
+	    folder = javaProject.getProject().getFolder("src");
 	}
 
-	folder.create(true, true, null);
+	// create only if exists
+	if (!folder.exists()) {
+	    folder.create(true, true, null);
+	}
 
 	// add new folder to class path
 	IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);

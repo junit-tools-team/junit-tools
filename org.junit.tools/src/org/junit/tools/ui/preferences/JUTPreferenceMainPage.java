@@ -262,15 +262,15 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 
     protected void setExampleValueFolder() {
 
-	if ("".equals(fieldSrcFolder.getStringValue())) {
+	if ("".equals(fieldSrcFolder.getStringValue()) || "src".equals(fieldSrcFolder.getStringValue())) {
 	    srcFolderIsEqual = true;
 
 	    if (projectIsEqual) {
 		folderExample
-			.setText("Source folder and test source folder is equal (\"src\")");
+			.setText("Source folder and test source folder is equal");
 	    } else {
 		folderExample
-			.setText("The default for the test source folder is \"src\"");
+			.setText("The name of the test source folder is equal to the folder of the class under test");
 	    }
 	} else {
 	    srcFolderIsEqual = false;
@@ -374,7 +374,7 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 
     private void checkValid() {
 	if (projectIsEqual && srcFolderIsEqual && packageIsEqual
-		&& classIsEqual && methodIsEqual) {
+		&& classIsEqual) {
 	    setErrorMessage("There must be a difference between the elements under test and the corresponding test elements!");
 	    setValid(false);
 	} else {
