@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.junit.tools.base.JUTWarning;
 import org.junit.tools.generator.model.JUTElements;
 import org.junit.tools.generator.utils.JDTUtils;
 import org.junit.tools.preferences.JUTPreferences;
@@ -38,16 +39,17 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
     /**
      * Generates the test-suites after a test-class generation depend on the
      * utmElements (bottom-up)
+     * @throws JUTWarning 
      */
     @Override
-    public boolean generateTestSuites(JUTElements utmElements)
-	    throws CoreException {
+    public boolean generateTestSuites(JUTElements jutElements)
+	    throws CoreException, JUTWarning {
 	init();
 
-	IJavaProject testProject = utmElements.getProjects().getTestProject();
-	IPackageFragment testPackage = utmElements.getClassesAndPackages()
+	IJavaProject testProject = jutElements.getProjects().getTestProject();
+	IPackageFragment testPackage = jutElements.getClassesAndPackages()
 		.getTestPackage(true);
-	String testClassName = utmElements.getClassesAndPackages()
+	String testClassName = jutElements.getClassesAndPackages()
 		.getTestClassName();
 
 	HashSet<String> childTestSuites = new HashSet<String>();
@@ -225,7 +227,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 			IPackageFragment pf = (IPackageFragment) javaElement;
 			if (pf.getKind() == IPackageFragmentRoot.K_SOURCE) {
 
-			    if (pf.getElementName().endsWith(".testbase")) {
+			    if (pf.getElementName().equals(pf.getJavaProject().getElementName() + ".all")) {
 				baseTestSuitePackage = pf;
 				baseTestSuiteCuList = pf.getCompilationUnits();
 				continue;
@@ -273,7 +275,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 		    if (baseTestSuitePackage == null) {
 			baseTestSuitePackage = JDTUtils.getPackage(testProject,
 				testFragmentRoot, testProject.getElementName()
-					+ ".testbase", true);
+					+ ".all", true);
 			baseTestSuiteCuList = new ICompilationUnit[0];
 		    }
 

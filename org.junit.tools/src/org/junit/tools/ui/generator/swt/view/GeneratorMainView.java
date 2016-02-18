@@ -32,7 +32,7 @@ public class GeneratorMainView extends Composite {
 	return txtTestProject;
     }
 
-    public Button getBtnPrioHigh() {
+    /*public Button getBtnPrioHigh() {
 	return btnPrioHigh;
     }
 
@@ -42,7 +42,7 @@ public class GeneratorMainView extends Composite {
 
     public Button getBtnPrioLow() {
 	return btnPrioLow;
-    }
+    }*/
 
     public Button getBtnFailassertion() {
 	return btnFailassertion;
@@ -80,9 +80,9 @@ public class GeneratorMainView extends Composite {
 	return methodSelectionGroup;
     }
 
-    public Button getBtnTestProject() {
-	return btnTestProject;
-    }
+//    public Button getBtnTestProject() {
+//	return btnTestProject;
+//    }
 
     public Button getBtnSuperClass() {
 	return btnSuperClass;
@@ -96,11 +96,11 @@ public class GeneratorMainView extends Composite {
 
     private final Text txtTestProject;
 
-    private final Button btnPrioHigh;
+    /*private final Button btnPrioHigh;
 
     private final Button btnPrioStandard;
 
-    private final Button btnPrioLow;
+    private final Button btnPrioLow;*/
 
     private final Button btnFailassertion;
 
@@ -120,7 +120,7 @@ public class GeneratorMainView extends Composite {
 
     private final GroupMethodSelectionView methodSelectionGroup;
 
-    private final Button btnTestProject;
+//    private final Button btnTestProject;
 
     private Button btnSuperClass;
 
@@ -169,10 +169,11 @@ public class GeneratorMainView extends Composite {
 	txtTestProject.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 		false));
 
-	btnTestProject = new Button(composite_2, SWT.NONE);
+	new Label(composite_2, SWT.NONE);
+	/*btnTestProject = new Button(composite_2, SWT.NONE);
 	btnTestProject.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
 		false));
-	btnTestProject.setText(Messages.GeneratorWizardMainPage_Browse);
+	btnTestProject.setText(Messages.GeneratorWizardMainPage_Browse);*/
 
 	if (withSuperclass) {
 	    Label lblNewLabel = new Label(composite_2, SWT.NONE);
@@ -198,7 +199,7 @@ public class GeneratorMainView extends Composite {
 		false));
 	new Label(composite_2, SWT.NONE);
 
-	Label lblPrioritt = new Label(composite_2, SWT.NONE);
+	/*Label lblPrioritt = new Label(composite_2, SWT.NONE);
 	lblPrioritt.setText(Messages.GeneratorWizardMainPage_Testpriority);
 
 	Composite composite_4 = new Composite(composite_2, SWT.NONE);
@@ -218,7 +219,7 @@ public class GeneratorMainView extends Composite {
 
 	btnPrioLow = new Button(composite_4, SWT.RADIO);
 	btnPrioLow.setText(Messages.GeneratorWizardMainPage_low);
-	new Label(composite_2, SWT.NONE);
+	new Label(composite_2, SWT.NONE);*/
 
 	Label label = new Label(composite_2, SWT.SEPARATOR | SWT.HORIZONTAL
 		| SWT.CENTER);

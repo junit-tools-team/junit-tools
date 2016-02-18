@@ -249,9 +249,10 @@ public class MainController implements IGeneratorConstants {
      * @param jutElements
      * @return
      * @throws CoreException
+     * @throws JUTWarning 
      */
     protected ArrayList<ICompilationUnit> generateTestSuites(
-	    JUTElements jutElements) throws CoreException {
+	    JUTElements jutElements) throws CoreException, JUTWarning {
 
 	for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
 		.getExtensionHandler().getTestSuitesGenerators()) {

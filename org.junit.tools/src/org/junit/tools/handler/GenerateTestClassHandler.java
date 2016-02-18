@@ -33,24 +33,20 @@ public class GenerateTestClassHandler extends JUTHandler {
 
 	MainController ctrl = new MainController();
 	IWorkbenchWindow activeWorkbenchWindow;
-	activeWorkbenchWindow = PlatformUI.getWorkbench()
-		.getActiveWorkbenchWindow();
+	activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 
-	ISelection selection = activeWorkbenchWindow.getSelectionService()
-		.getSelection();
+	ISelection selection = activeWorkbenchWindow.getSelectionService().getSelection();
 	boolean result = false;
 
 	try {
 	    if (selection instanceof IStructuredSelection) {
-		result = ctrl.generateTestclass(activeWorkbenchWindow,
-			(IStructuredSelection) selection);
+		result = ctrl.generateTestclass(activeWorkbenchWindow, (IStructuredSelection) selection);
 
 	    } else {
 		IEditorInput editorInput = EclipseUIUtils.getEditorInput();
 
 		if (editorInput instanceof IFileEditorInput) {
-		    result = ctrl.generateTestclass(activeWorkbenchWindow,
-			    ((IFileEditorInput) editorInput));
+		    result = ctrl.generateTestclass(activeWorkbenchWindow, ((IFileEditorInput) editorInput));
 		}
 	    }
 	} catch (JUTWarning e) {
@@ -61,8 +57,8 @@ public class GenerateTestClassHandler extends JUTHandler {
 
 	if (result) {
 	    String information = Messages.General_information;
-	    MessageDialog.openInformation(activeWorkbenchWindow.getShell(),
-		    information, Messages.General_info_generation_successful);
+	    MessageDialog.openInformation(activeWorkbenchWindow.getShell(), information,
+		    Messages.General_info_generation_successful);
 	}
 
 	return null;

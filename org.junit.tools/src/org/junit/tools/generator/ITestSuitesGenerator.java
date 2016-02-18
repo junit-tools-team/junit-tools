@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.junit.tools.base.JUTWarning;
 import org.junit.tools.generator.model.JUTElements;
 
 /**
@@ -21,8 +22,9 @@ public interface ITestSuitesGenerator {
      * @param utmElements
      * @return true if the creations were successful
      * @throws CoreException
+     * @throws JUTWarning 
      */
-    boolean generateTestSuites(JUTElements utmElements) throws CoreException;
+    boolean generateTestSuites(JUTElements utmElements) throws CoreException, JUTWarning;
 
     /**
      * Generates the test-suites for a hole test-project.

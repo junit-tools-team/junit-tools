@@ -126,9 +126,10 @@ public class JUTElements {
 	/**
 	 * @return test class
 	 * @throws CoreException
+	 * @throws JUTWarning 
 	 */
 	public ICompilationUnit getTestClass(boolean createIfNotExists)
-		throws CoreException {
+		throws CoreException, JUTWarning {
 	    if (createIfNotExists && (testClass == null || !testClass.exists())) {
 		IPackageFragment testPckg = getTestPackage(true);
 		testClass = testPckg.createCompilationUnit(testClassName
@@ -169,9 +170,10 @@ public class JUTElements {
 	/**
 	 * @return test package
 	 * @throws CoreException
+	 * @throws JUTWarning 
 	 */
 	public IPackageFragment getTestPackage(boolean createIfNotExists)
-		throws CoreException {
+		throws CoreException, JUTWarning {
 	    if (createIfNotExists
 		    && (testPackage == null || !testPackage.exists())) {
 		testPackage = JDTUtils.getPackage(
@@ -671,8 +673,7 @@ public class JUTElements {
 		} else if (basePackageName.startsWith(baseProjectName)) {
 		    testPackageName = basePackageName.replace(baseProjectName,
 			    testProjectName);
-		} else if (testPackagePostfix.equals("")) {
-		    testPackageName = basePackageName;
+		    testPackageName += testPackagePostfix;
 		} else {
 		    testPackageName = basePackageName + "."
 			    + testPackagePostfix;
@@ -698,7 +699,7 @@ public class JUTElements {
 		int lastIndexOf = testPackageName
 			.lastIndexOf(testPackagePostfix);
 
-		if (lastIndexOf < 0) {
+		if (lastIndexOf > -1) {
 		    basePackageName = testPackageName.substring(0, lastIndexOf);
 		} else {
 		    throw new JUTWarning(
@@ -783,7 +784,7 @@ public class JUTElements {
     }
 
     private IPackageFragmentRoot getTestSourceFolder(IJavaProject testProject,
-	    IPackageFragment basePackage) throws CoreException {
+	    IPackageFragment basePackage) throws CoreException, JUTWarning {
 	List<String> testSegments = new ArrayList<String>();
 
 	IJavaElement parent = basePackage.getParent();

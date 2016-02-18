@@ -45,6 +45,7 @@ public class MockClassGenerator implements IMockClassGenerator,
     private Logger logger = Logger
 	    .getLogger(MockClassGenerator.class.getName());
     private ICompilationUnit generatedCuMock = null;
+    private JUTWarning jutWarning;
 
     @Override
     public ICompilationUnit generate(IWorkbenchWindow activeWorkbenchWindow,
@@ -65,7 +66,7 @@ public class MockClassGenerator implements IMockClassGenerator,
     }
 
     private ICompilationUnit generate(Vector<IJavaElement> javaElements,
-	    IWorkbenchWindow activeWorkbenchWindow) throws CoreException {
+	    IWorkbenchWindow activeWorkbenchWindow) throws CoreException, JUTWarning {
 	if (javaElements.size() == 0) {
 	    return null;
 	}
@@ -110,10 +111,12 @@ public class MockClassGenerator implements IMockClassGenerator,
 	    final IPackageFragment targetPackageTmp, final boolean isMockNew,
 	    final ICompilationUnit mockClass,
 	    final HashMap<MethodRef, IMethod> existingMethods)
-	    throws CoreException {
+	    throws CoreException, JUTWarning {
 	if (checkedMethods == null || checkedMethods.size() == 0) {
 	    return null;
 	}
+	
+	jutWarning = null;
 
 	JavaCore.run(new IWorkspaceRunnable() {
 
@@ -131,8 +134,13 @@ public class MockClassGenerator implements IMockClassGenerator,
 		IPackageFragment targetPackage;
 
 		if (!targetPackageTmp.exists()) {
-		    targetPackage = JDTUtils.createPackage(targetProject,
+		    try {
+			targetPackage = JDTUtils.createPackage(targetProject,
 			    targetPackageTmp.getElementName());
+		    } catch (JUTWarning e) {
+			setJUTWarning(e);
+			return;
+		    }
 		} else {
 		    targetPackage = targetPackageTmp;
 		}
@@ -164,8 +172,16 @@ public class MockClassGenerator implements IMockClassGenerator,
 	    }
 
 	}, null);
+	
+	if (jutWarning != null) {
+	    throw jutWarning;
+	}
 
 	return generatedCuMock;
+    }
+
+    protected void setJUTWarning(JUTWarning e) {
+	this.jutWarning = e;
     }
 
     protected void save(ICompilationUnit cuMock)
@@ -497,7 +513,7 @@ public class MockClassGenerator implements IMockClassGenerator,
     }
 
     private MockGeneratorWizard openWizard(IJavaElement javaElement,
-	    IWorkbenchWindow activeWorkbenchWindow) throws CoreException {
+	    IWorkbenchWindow activeWorkbenchWindow) throws CoreException, JUTWarning {
 	MockGeneratorWizard wizard = new MockGeneratorWizard(javaElement);
 
 	WizardDialog dialog = new WizardDialog(

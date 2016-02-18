@@ -21,6 +21,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.junit.tools.base.JUTWarning;
 import org.junit.tools.base.MethodRef;
 import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
@@ -63,7 +64,7 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 	addPage(mainPage);
     }
 
-    public void init() throws CoreException {
+    public void init() throws CoreException, JUTWarning {
 	// get mock project
 	IJavaProject project = JDTUtils.getProject(JUTPreferences
 		.getMockProject());

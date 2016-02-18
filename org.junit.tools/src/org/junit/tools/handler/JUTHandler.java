@@ -80,8 +80,7 @@ public abstract class JUTHandler implements IHandler {
 	log.log(status);
 
 	// open error dialog
-	MessageDialog.openError(shell, error, errorMsg
-		+ IGeneratorConstants.RETURN + e.getMessage());
+	MessageDialog.openError(shell, error, errorMsg);
     }
 
     protected void handleWarning(JUTWarning e) {

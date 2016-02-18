@@ -105,15 +105,15 @@ public class GeneratorWizardMain extends GeneratorWizardBase implements
 		    }
 		});
 
-	page.getView().getBtnTestProject()
-		.addSelectionListener(new SelectionAdapter() {
-
-		    @Override
-		    public void widgetSelected(SelectionEvent e) {
-			super.widgetSelected(e);
-			handleTestProject();
-		    }
-		});
+//	page.getView().getBtnTestProject()
+//		.addSelectionListener(new SelectionAdapter() {
+//
+//		    @Override
+//		    public void widgetSelected(SelectionEvent e) {
+//			super.widgetSelected(e);
+//			handleTestProject();
+//		    }
+//		});
 
 	if (page.getView().getBtnSuperClass() != null) {
 	    page.getView().getBtnSuperClass()
@@ -338,7 +338,8 @@ public class GeneratorWizardMain extends GeneratorWizardBase implements
      * @param tmlTest
      */
     private void initTestprio(GeneratorWizardMainPage page, Test tmlTest) {
-	page.getView().getBtnPrioHigh().setSelection(false);
+	// TODO test prio deactivated 
+	/*page.getView().getBtnPrioHigh().setSelection(false);
 	page.getView().getBtnPrioStandard().setSelection(false);
 	page.getView().getBtnPrioLow().setSelection(false);
 
@@ -361,7 +362,7 @@ public class GeneratorWizardMain extends GeneratorWizardBase implements
 	    }
 	} else {
 	    page.getView().getBtnPrioStandard().setSelection(true);
-	}
+	}*/
     }
 
     @Override
@@ -384,14 +385,15 @@ public class GeneratorWizardMain extends GeneratorWizardBase implements
 	// TML-version
 	tmlTest.setVersion(TML_VERSION_ACTUAL);
 
-	// test-priority
-	if (page.getView().getBtnPrioHigh().getSelection()) {
-	    tmlTest.setTestPrio(Testprio.HIGH);
-	} else if (page.getView().getBtnPrioStandard().getSelection()) {
-	    tmlTest.setTestPrio(Testprio.DEFAULT);
-	} else if (page.getView().getBtnPrioLow().getSelection()) {
-	    tmlTest.setTestPrio(Testprio.LOW);
-	}
+	// TODO test-priority
+	tmlTest.setTestPrio(Testprio.DEFAULT);
+//	if (page.getView().getBtnPrioHigh().getSelection()) {
+//	    tmlTest.setTestPrio(Testprio.HIGH);
+//	} else if (page.getView().getBtnPrioStandard().getSelection()) {
+//	    tmlTest.setTestPrio(Testprio.DEFAULT);
+//	} else if (page.getView().getBtnPrioLow().getSelection()) {
+//	    tmlTest.setTestPrio(Testprio.LOW);
+//	}
 
 	Text txtSuperClass = page.getView().getTxtSuperClass();
 	if (txtSuperClass != null) {

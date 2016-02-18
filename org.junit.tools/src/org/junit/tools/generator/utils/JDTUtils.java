@@ -312,7 +312,7 @@ public class JDTUtils implements IGeneratorConstants {
     }
 
     public static IPackageFragment getPackage(IJavaProject javaProject,
-	    String name, boolean createIfNotExists) throws CoreException {
+	    String name, boolean createIfNotExists) throws CoreException, JUTWarning {
 	return getPackage(javaProject, "src", name, createIfNotExists);
     }
 
@@ -328,7 +328,7 @@ public class JDTUtils implements IGeneratorConstants {
 
     public static IPackageFragment getPackage(IJavaProject javaProject,
 	    String srcFolder, String name, boolean createIfNotExists)
-	    throws CoreException {
+	    throws CoreException, JUTWarning {
 	String srcFolderName = "";
 
 	if (srcFolder == null || "".equals(srcFolder)) {
@@ -351,7 +351,7 @@ public class JDTUtils implements IGeneratorConstants {
     }
 
     public static IPackageFragmentRoot createSourceFolder(
-	    IJavaProject javaProject, IPath folderPath) throws CoreException {
+	    IJavaProject javaProject, IPath folderPath) throws CoreException, JUTWarning {
 	IFolder folder = javaProject.getProject().getFolder(folderPath);
 
 	if (!folder.exists()) {
@@ -362,7 +362,7 @@ public class JDTUtils implements IGeneratorConstants {
     }
 
     public static IPackageFragmentRoot createSourceFolder(
-	    IJavaProject javaProject, IFolder folder) throws CoreException {
+	    IJavaProject javaProject, IFolder folder) throws CoreException, JUTWarning {
 	
 	IPath fullPath = folder.getFullPath();
 	
@@ -370,6 +370,10 @@ public class JDTUtils implements IGeneratorConstants {
 	
 	IFolder tmpFolder = null;
 	for (String segment : fullPath.segments()) {
+	    if (segment.indexOf(".") > 0) {
+		throw new JUTWarning("Dots are not supported in folder names");
+	    }
+	    
 	    // nested folders
 	    if (tmpFolder != null) {
 		tmpFolder = tmpFolder.getFolder(segment);
@@ -444,13 +448,14 @@ public class JDTUtils implements IGeneratorConstants {
     }
 
     /**
-     * creates src- and package-folders
+     * creates source- and package-folders
      * 
      * @param name
      * @throws CoreException
+     * @throws JUTWarning 
      */
     public static IPackageFragment createPackage(IJavaProject javaProject,
-	    String name) throws CoreException {
+	    String name) throws CoreException, JUTWarning {
 	return getPackage(javaProject, name, true);
     }
 
@@ -459,9 +464,10 @@ public class JDTUtils implements IGeneratorConstants {
      * 
      * @param name
      * @throws CoreException
+     * @throws JUTWarning 
      */
     public static IPackageFragment createPackage(IJavaProject javaProject,
-	    String parentFolderName, String name) throws CoreException {
+	    String parentFolderName, String name) throws CoreException, JUTWarning {
 	IFolder folder = javaProject.getProject().getFolder(parentFolderName);
 
 	IPackageFragmentRoot parentFolder = null;
