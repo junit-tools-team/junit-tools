@@ -6,7 +6,6 @@ import java.util.Vector;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -221,7 +220,7 @@ public class JDTUtils implements IGeneratorConstants {
 	}
     }
 
-    public static IJavaProject getProject(ISelection selection) {
+    public static IJavaProject getProject(ISelection selection) throws JUTWarning {
 	return getProject(selection, null);
     }
 
@@ -229,9 +228,10 @@ public class JDTUtils implements IGeneratorConstants {
      * @param selection
      * @param fileEditorInput
      * @return java-project from the selection or from the editor.
+     * @throws JUTWarning 
      */
     public static IJavaProject getProject(ISelection selection,
-	    IFileEditorInput fileEditorInput) {
+	    IFileEditorInput fileEditorInput) throws JUTWarning {
 	Object firstElement;
 	IProject project = null;
 
@@ -273,14 +273,15 @@ public class JDTUtils implements IGeneratorConstants {
     /**
      * @param project
      * @return converted java project
+     * @throws JUTWarning 
      */
-    public static IJavaProject convertToJavaProject(IProject project) {
+    public static IJavaProject convertToJavaProject(IProject project) throws JUTWarning {
 	IJavaProject jProject;
 	try {
 	    if (project.hasNature(JavaCore.NATURE_ID)) {
 		jProject = JavaCore.create(project);
 	    } else {
-		throw new RuntimeException(
+		throw new JUTWarning(
 			Messages.GeneratorUtils_OnlyJavaProjects);
 	    }
 	} catch (CoreException e) {
@@ -561,8 +562,9 @@ public class JDTUtils implements IGeneratorConstants {
      * 
      * @param name
      * @return java project
+     * @throws JUTWarning 
      */
-    public static IJavaProject getProject(String name) {
+    public static IJavaProject getProject(String name) throws JUTWarning {
 	return getProject(name, false, null);
     }
 
@@ -573,9 +575,10 @@ public class JDTUtils implements IGeneratorConstants {
      * @param createIfNotExists
      * @param baseProject
      * @return the java project
+     * @throws JUTWarning 
      */
     public static IJavaProject getProject(String name,
-	    boolean createIfNotExists, IJavaProject baseProject) {
+	    boolean createIfNotExists, IJavaProject baseProject) throws JUTWarning {
 	for (IProject project : getProjects()) {
 	    if (project.getName().equals(name)) {
 		return convertToJavaProject(project);
