@@ -18,6 +18,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.junit.tools,
  org.junit.tools.base,
+ org.junit.tools.configuration.base,
  org.junit.tools.generator,
  org.junit.tools.generator.model,
  org.junit.tools.generator.model.tml,

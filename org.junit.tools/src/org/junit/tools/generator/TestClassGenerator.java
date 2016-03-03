@@ -972,21 +972,26 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
 	// create param assignments
 	createParamAssignments(paramAssignments, sbTestMethodBody);
 
-	// create param-list
-	String paramNameList = createParamNameList(params);
-
 	// result
 	if (resultVariableName.length() > 0) {
 	    sbTestMethodBody.append(resultVariableName).append("=");
 	}
 
+	String paramNameList;
+
 	if (isPublic) {
+	    // create parameter list
+	    paramNameList = createParamNameList(params);
+
 	    // method-call
 	    sbTestMethodBody.append(baseName).append(".").append(methodName).append("(").append(paramNameList)
 		    .append(");");
 	} else {
+	    // create parameter list for private call
+	    paramNameList = createParamNameList(params, true);
 
-	    // method-call with white-box-call
+	    // method-call with mock-framework-call (JMockit and
+	    // Deencapsulation)
 	    if (paramNameList.length() > 0) {
 		paramNameList = ", new Object[]{" + paramNameList + "}";
 	    }
@@ -995,7 +1000,7 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
 		baseName += ".class";
 	    }
 
-	    // TODO abfrage ob powermock oder jmockit
+	    // TODO check if powermock or jmockit
 	    // sbTestMethodBody.append("Whitebox.invokeMethod(").append(baseName).append(",
 	    // ").append(QUOTES)
 	    // .append(methodName).append(QUOTES).append(paramValueList).append(");");
@@ -1007,13 +1012,34 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
     }
 
     protected String createParamNameList(List<Param> params) {
+	return createParamNameList(params, false);
+    }
+
+    protected String createParamNameList(List<Param> params, boolean useTypeForNull) {
 
 	StringBuilder sbParamList = new StringBuilder();
 	String comma = "";
 
 	for (Param param : params) {
+
 	    sbParamList.append(comma);
-	    sbParamList.append(param.getName());
+	    if (useTypeForNull) {
+		String initValue = JDTUtils.createInitValue(param.getType());
+		if (param.getType() != null) {
+		    initValue = JDTUtils.createInitValue(param.getType());
+		} else {
+		    initValue = "null";
+		}
+
+		if (initValue.equals("null")) {
+		    sbParamList.append(param.getType() + ".class");
+		} else {
+		    sbParamList.append(param.getName());
+		}
+
+	    } else {
+		sbParamList.append(param.getName());
+	    }
 
 	    comma = ", ";
 	}

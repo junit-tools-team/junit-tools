@@ -85,24 +85,27 @@ public abstract class JUTHandler implements IHandler {
 	log.log(status);
 
 	// open error dialog
-	StringWriter sw = new StringWriter();
-	PrintWriter pw = new PrintWriter(sw);
-	e.printStackTrace(pw);
+	try {
+	    StringWriter sw = new StringWriter();
+	    PrintWriter pw = new PrintWriter(sw);
+	    e.printStackTrace(pw);
 
-	// convert stack trace lines to status objects
-	final String trace = sw.toString();
-	List<Status> stackStatus = new ArrayList<Status>();
-	for (String line : trace.split(System.getProperty("line.separator"))) {
-	    stackStatus.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-		    line));
+	    // convert stack trace lines to status objects
+	    final String trace = sw.toString();
+	    List<Status> stackStatus = new ArrayList<Status>();
+	    for (String line : trace.split(System.getProperty("line.separator"))) {
+		stackStatus.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID, line));
+	    }
+
+	    MultiStatus ms = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, stackStatus.toArray(new Status[] {}),
+		    e.getLocalizedMessage(), e);
+
+	    // open error dialog
+	    ErrorDialog.openError(shell, error, errorMsg, ms);
+	} catch (Exception ex2) {
+	    ErrorDialog.openError(shell, error, errorMsg, status);
 	}
 
-	MultiStatus ms = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR,
-		stackStatus.toArray(new Status[] {}),
-		e.getLocalizedMessage(), e);
-
-	// open error dialog
-	ErrorDialog.openError(shell, error, errorMsg, ms);
     }
 
     protected void handleWarning(JUTWarning e) {
