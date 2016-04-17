@@ -583,6 +583,9 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
 	
 	String[] testClassAnnotations = JUTPreferences.getTestClassAnnotations();
 	for (String additionalAnno : testClassAnnotations) {
+	    if (!additionalAnno.startsWith("@")) {
+		additionalAnno = "@" + additionalAnno;
+	    }
 	    annotations.append(additionalAnno).append(RETURN);
 	}
 

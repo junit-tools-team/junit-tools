@@ -309,6 +309,9 @@ public class MockClassGenerator implements IMockClassGenerator,
 
 	String[] mockClassAnnotations = JUTPreferences.getMockClassAnnotations();
 	for (String additionalAnno : mockClassAnnotations) {
+	    if (!additionalAnno.startsWith("@")) {
+		additionalAnno = "@" + additionalAnno;
+	    }
 	    annotations.append(additionalAnno).append(RETURN);
 	}
 	
