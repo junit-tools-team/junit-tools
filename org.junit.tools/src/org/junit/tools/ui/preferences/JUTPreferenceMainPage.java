@@ -249,7 +249,7 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 	// mock project
 	Label label = new Label(getFieldEditorParent(), SWT.WRAP);
 	label.setLayoutData(createGridData());
-	label.setText("Here you can set the target project for the generated mock objects:");
+	label.setText("Here you can set the target project for the generated mock-classes:");
 
 	addField(new StringFieldEditor(MOCK_PROJECT,
 		Messages.JUTPreferenceMainPage_Mock_Project,
@@ -375,7 +375,7 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
     private void checkValid() {
 	if (projectIsEqual && srcFolderIsEqual && packageIsEqual
 		&& classIsEqual) {
-	    setErrorMessage("There must be a difference between the elements under test and the corresponding test elements!");
+	    setErrorMessage("Between the elements under test and the corresponding test elements must be a difference!");
 	    setValid(false);
 	} else {
 	    // reset error message
@@ -389,7 +389,7 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 
 	if ("".equals(fieldSuperType.getStringValue())) {
 	    superTypeExample
-		    .setText("There is no super type defined for the test class");
+		    .setText("No super type is defined");
 	} else {
 	    superTypeExample
 		    .setText("The default super class for the test class is \""

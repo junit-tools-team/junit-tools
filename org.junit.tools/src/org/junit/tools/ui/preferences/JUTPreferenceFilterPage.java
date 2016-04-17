@@ -93,7 +93,14 @@ public class JUTPreferenceFilterPage extends PreferencePage implements
 	addButton.setText("Add to List"); //$NON-NLS-1$
 	addButton.addSelectionListener(new SelectionAdapter() {
 	    public void widgetSelected(SelectionEvent event) {
-		listMethodFilterName.add(newMethodFilterName.getText(),
+		String newEntry = newMethodFilterName.getText();
+		for (String item : listMethodFilterName.getItems()) {
+		    if (newEntry.equals(item)) {
+			return;
+		    }
+		}
+		
+		listMethodFilterName.add(newEntry,
 			listMethodFilterName.getItemCount());
 	    }
 	});
@@ -163,7 +170,14 @@ public class JUTPreferenceFilterPage extends PreferencePage implements
 	addButton.setText("Add to List"); //$NON-NLS-1$
 	addButton.addSelectionListener(new SelectionAdapter() {
 	    public void widgetSelected(SelectionEvent event) {
-		listMethodFilterModifier.add(newMethodFilterModifier.getText(),
+		String newEntry = newMethodFilterModifier.getText();
+		for (String item : listMethodFilterModifier.getItems()) {
+		    if (newEntry.equals(item)) {
+			return;
+		    }
+		}
+		
+		listMethodFilterModifier.add(newEntry,
 			listMethodFilterModifier.getItemCount());
 	    }
 	});
@@ -200,20 +214,13 @@ public class JUTPreferenceFilterPage extends PreferencePage implements
 	setDescription(Messages.JUTPreferenceFilterPage_description_filters);
     }
 
-    /**
-     * Performs special processing when this page's Restore Defaults button has
-     * been pressed. Sets the contents of the nameEntry field to be the default
-     */
     protected void performDefaults() {
 	listMethodFilterName.setItems(getDefaultMethodFilterNamePref());
 	listMethodFilterModifier.setItems(getDefaultMethodFilterModifierPref());
     }
 
-    /**
-     * Method declared on IPreferencePage. Save the author name to the
-     * preference store.
-     */
     public boolean performOk() {
+	setMethodFilterNamePref(listMethodFilterName.getItems());
 	setMethodFilterModifierPref(listMethodFilterModifier.getItems());
 	return super.performOk();
     }

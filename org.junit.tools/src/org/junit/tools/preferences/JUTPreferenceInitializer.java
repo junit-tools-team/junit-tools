@@ -45,6 +45,12 @@ public class JUTPreferenceInitializer extends AbstractPreferenceInitializer
 
 	store.setDefault(MOCK_PROJECT, "org.junit.tools.mock");
 
+	store.setDefault(TEST_CLASS_ANNOTATIONS, "");
+	
+	store.setDefault(MOCK_CLASS_ANNOTATIONS, "");
+	
+	store.setDefault(STATIC_BINDINGS, "");
+	
 	// initialize JUT-preferences
 	JUTPreferences.initialize();
 

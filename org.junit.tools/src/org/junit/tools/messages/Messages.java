@@ -128,12 +128,15 @@ public class Messages extends NLS {
     public static String GeneratorWizardTestCasesPage_assertions;
     public static String GeneratorWizardTestCasesPage_Method;
     public static String GeneratorWizardTestCasesPage_testcases;
+
     public static String JUTPreferenceFilterPage_description_filters;
-
     public static String JUTPreferenceFilterPage_Modifier_filter;
-
     public static String JUTPreferenceFilterPage_Name_filter;
 
+    public static String JUTPreferenceAnnotationsPage_description;
+    
+    public static String JUTPreferenceStaticBindingsPage_description;
+    
     public static String JUTPreferenceMainPage_description_Main_settings;
     public static String JUTPreferenceMainPage_Test_class_prefix;
     public static String JUTPreferenceMainPage_Test_class_postfix;

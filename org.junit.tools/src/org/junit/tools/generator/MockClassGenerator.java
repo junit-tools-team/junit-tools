@@ -29,7 +29,9 @@ import org.junit.tools.base.JUTWarning;
 import org.junit.tools.base.MethodRef;
 import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
+import org.junit.tools.preferences.JUTPreferences;
 import org.junit.tools.ui.generator.wizards.MockGeneratorWizard;
+import org.junit.tools.ui.preferences.JUTPreferenceAnnotationsPage;
 import org.junit.tools.ui.utils.EclipseUIUtils;
 
 /**
@@ -302,10 +304,16 @@ public class MockClassGenerator implements IMockClassGenerator,
 
 	String annoGenerated = GeneratorUtils.createAnnoGenerated();
 
-	String annotations = annoGenerated + createCustomAnnotations();
+	StringBuilder annotations = new StringBuilder();
+	annotations.append(annoGenerated).append(createCustomAnnotations());
 
+	String[] mockClassAnnotations = JUTPreferences.getMockClassAnnotations();
+	for (String additionalAnno : mockClassAnnotations) {
+	    annotations.append(additionalAnno).append(RETURN);
+	}
+	
 	String source = "/** Mock for " + "{ @link " + cuBaseName + " } */"
-		+ annotations + MOD_PUBLIC + " class " + cuMockNameTmp
+		+ annotations.toString() + MOD_PUBLIC + " class " + cuMockNameTmp
 		+ extendsClause + "{ " + RETURN + "}";
 
 	return source;

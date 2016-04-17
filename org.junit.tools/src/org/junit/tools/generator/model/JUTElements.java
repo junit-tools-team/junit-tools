@@ -2,6 +2,7 @@ package org.junit.tools.generator.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.core.resources.IFolder;
@@ -64,8 +65,7 @@ public class JUTElements {
 	/**
 	 * @param baseClassConstructors
 	 */
-	public void setBaseClassConstructors(
-		Vector<IMethod> baseClassConstructors) {
+	public void setBaseClassConstructors(Vector<IMethod> baseClassConstructors) {
 	    this.baseClassConstructors = baseClassConstructors;
 	}
 
@@ -126,14 +126,12 @@ public class JUTElements {
 	/**
 	 * @return test class
 	 * @throws CoreException
-	 * @throws JUTWarning 
+	 * @throws JUTWarning
 	 */
-	public ICompilationUnit getTestClass(boolean createIfNotExists)
-		throws CoreException, JUTWarning {
+	public ICompilationUnit getTestClass(boolean createIfNotExists) throws CoreException, JUTWarning {
 	    if (createIfNotExists && (testClass == null || !testClass.exists())) {
 		IPackageFragment testPckg = getTestPackage(true);
-		testClass = testPckg.createCompilationUnit(testClassName
-			+ ".java", "", true, null);
+		testClass = testPckg.createCompilationUnit(testClassName + ".java", "", true, null);
 	    }
 
 	    return testClass;
@@ -170,16 +168,12 @@ public class JUTElements {
 	/**
 	 * @return test package
 	 * @throws CoreException
-	 * @throws JUTWarning 
+	 * @throws JUTWarning
 	 */
-	public IPackageFragment getTestPackage(boolean createIfNotExists)
-		throws CoreException, JUTWarning {
-	    if (createIfNotExists
-		    && (testPackage == null || !testPackage.exists())) {
-		testPackage = JDTUtils.getPackage(
-			projects.getTestProject(),
-			getTestSourceFolder(projects.getTestProject(),
-				classesAndPackages.getBasePackages().get(0)),
+	public IPackageFragment getTestPackage(boolean createIfNotExists) throws CoreException, JUTWarning {
+	    if (createIfNotExists && (testPackage == null || !testPackage.exists())) {
+		testPackage = JDTUtils.getPackage(projects.getTestProject(),
+			getTestSourceFolder(projects.getTestProject(), classesAndPackages.getBasePackages().get(0)),
 			testPackageName, true);
 	    }
 	    return testPackage;
@@ -348,19 +342,15 @@ public class JUTElements {
     public void setProjects(JUTProjects projects) throws JUTWarning {
 	if (projects.isBaseProjectSelected()) {
 	    if (projects.getBaseProject() == null) {
-		throw new JUTWarning(
-			Messages.General_warning_project_initialization);
+		throw new JUTWarning(Messages.General_warning_project_initialization);
 	    } else if (projects.getTestProject() == null) {
-		throw new JUTWarning(
-			Messages.General_warning_test_project_not_found);
+		throw new JUTWarning(Messages.General_warning_test_project_not_found);
 	    }
 	} else {
 	    if (projects.getTestProject() == null) {
-		throw new JUTWarning(
-			Messages.General_warning_project_initialization);
+		throw new JUTWarning(Messages.General_warning_project_initialization);
 	    } else if (projects.getBaseProject() == null) {
-		throw new JUTWarning(
-			Messages.General_warning_base_project_not_found);
+		throw new JUTWarning(Messages.General_warning_base_project_not_found);
 	    }
 	}
 
@@ -391,13 +381,11 @@ public class JUTElements {
     /**
      * @param constructorsAndMethods
      */
-    public void setConstructorsAndMethods(
-	    JUTConstructorsAndMethods constructorsAndMethods) {
+    public void setConstructorsAndMethods(JUTConstructorsAndMethods constructorsAndMethods) {
 	this.constructorsAndMethods = constructorsAndMethods;
     }
 
-    public JUTProjects initProjects(IJavaProject project, ICompilationUnit cu)
-	    throws JUTWarning {
+    public JUTProjects initProjects(IJavaProject project, ICompilationUnit cu) throws JUTWarning {
 	JUTProjects tmpProjects = new JUTProjects();
 
 	if (project == null) {
@@ -407,9 +395,39 @@ public class JUTElements {
 	String projectName = project.getElementName();
 	String testProjectPostfix = JUTPreferences.getTestProjectPostfix();
 
+	// check static bindings
+	Map<String, String> staticBindingsMapBaseProject = JUTPreferences.getStaticBindingsMapBaseProject();
+	Map<String, String> staticBindingsMapTestProject = JUTPreferences.getStaticBindingsMapTestProject();
+	if (staticBindingsMapBaseProject != null && staticBindingsMapTestProject != null) {
+	    String otherProject = "";
+	    if (staticBindingsMapBaseProject.containsKey(projectName)) {
+		tmpProjects.setBaseProjectSelected(true);
+		otherProject = staticBindingsMapBaseProject.get(projectName);
+		
+		IJavaProject testProject = (IJavaProject) JDTUtils.getProject(otherProject);
+		tmpProjects.setBaseProject(project);
+		tmpProjects.setTestProject(testProject);
+		
+		setProjects(tmpProjects);
+		
+		return tmpProjects;
+	    } else if (staticBindingsMapTestProject.containsKey(projectName)) {
+		tmpProjects.setBaseProjectSelected(false);
+		otherProject = staticBindingsMapTestProject.get(projectName);
+		
+		IJavaProject baseProject = (IJavaProject) JDTUtils.getProject(otherProject);
+		tmpProjects.setBaseProject(baseProject);
+		tmpProjects.setTestProject(project);
+		
+		setProjects(tmpProjects);
+		
+		return tmpProjects;
+	    }
+	    
+	}
+
 	// test project selected
-	if (!testProjectPostfix.equals("")
-		&& projectName.endsWith(testProjectPostfix)) {
+	if (!testProjectPostfix.equals("") && projectName.endsWith(testProjectPostfix)) {
 	    tmpProjects.setBaseProjectSelected(false);
 
 	    tmpProjects.setTestProject((IJavaProject) project);
@@ -422,8 +440,7 @@ public class JUTElements {
 		projectName = projectName.substring(0, lastIx);
 	    }
 
-	    IJavaProject baseProject = (IJavaProject) JDTUtils
-		    .getProject(projectName);
+	    IJavaProject baseProject = (IJavaProject) JDTUtils.getProject(projectName);
 	    tmpProjects.setBaseProject(baseProject);
 	} else {
 	    tmpProjects.setBaseProject((IJavaProject) project);
@@ -436,33 +453,25 @@ public class JUTElements {
 
 		// identify by test-class-name and test-source-folder-name
 		if (cu != null) {
-		    String testClassPrefix = JUTPreferences
-			    .getTestClassPrefix();
-		    String testClassPostfix = JUTPreferences
-			    .getTestClassPostfix();
+		    String testClassPrefix = JUTPreferences.getTestClassPrefix();
+		    String testClassPostfix = JUTPreferences.getTestClassPostfix();
 
-		    if (!"".equals(testClassPostfix)
-			    || !"".equals(testClassPrefix)) {
-			String cuName = cu.getElementName()
-				.replace(".java", "");
+		    if (!"".equals(testClassPostfix) || !"".equals(testClassPrefix)) {
+			String cuName = cu.getElementName().replace(".java", "");
 			cuName = cuName.replace(".class", "");
 
-			if (!cuName.startsWith(testClassPrefix)
-				|| !cuName.endsWith(testClassPostfix)) {
+			if (!cuName.startsWith(testClassPrefix) || !cuName.endsWith(testClassPostfix)) {
 			    tmpProjects.setBaseProjectSelected(true);
 			}
 		    } else {
-			String testSourceFolderName = JUTPreferences
-				.getTestProjectPostfix();
-			if ("src".equals(testSourceFolderName)
-				|| "".equals(testSourceFolderName)) {
+			String testSourceFolderName = JUTPreferences.getTestProjectPostfix();
+			if ("src".equals(testSourceFolderName) || "".equals(testSourceFolderName)) {
 			    // same folder as base-class - no difference to
 			    // base-class
 			    tmpProjects.setBaseProjectSelected(true);
 			} else {
 			    // get the source folder of the selected cu
-			    IPackageFragment cuPackage = JDTUtils
-				    .getPackage(cu);
+			    IPackageFragment cuPackage = JDTUtils.getPackage(cu);
 			    IJavaElement parent = cuPackage.getParent();
 
 			    if (parent instanceof IFolder) {
@@ -502,15 +511,14 @@ public class JUTElements {
 	return initProjects(project, null);
     }
 
-    public JUTClassesAndPackages initClassesAndPackages(ICompilationUnit cu)
-	    throws JUTWarning, CoreException {
+    public JUTClassesAndPackages initClassesAndPackages(ICompilationUnit cu) throws JUTWarning, CoreException {
 	Vector<ICompilationUnit> cuList = new Vector<ICompilationUnit>();
 	cuList.add(cu);
 	return initClassesAndPackages(cuList);
     }
 
-    public JUTClassesAndPackages initClassesAndPackages(
-	    Vector<ICompilationUnit> cuList) throws JUTWarning, CoreException {
+    public JUTClassesAndPackages initClassesAndPackages(Vector<ICompilationUnit> cuList)
+	    throws JUTWarning, CoreException {
 
 	ICompilationUnit baseCu = null;
 
@@ -531,8 +539,7 @@ public class JUTElements {
 	    initProjects(cu.getJavaProject());
 	}
 
-	JUTClassesAndPackages jutClassesAndPackages = initPackages(JDTUtils
-		.getPackage(cu));
+	JUTClassesAndPackages jutClassesAndPackages = initPackages(JDTUtils.getPackage(cu));
 
 	if (projects.isBaseProjectSelected()) {
 	    baseCu = cuList.get(0);
@@ -548,8 +555,7 @@ public class JUTElements {
 		testCuName = testClassPrefix + baseCuName + testClassPostfix;
 
 		if (testPackage != null) {
-		    testCu = testPackage.getCompilationUnit(testCuName
-			    + ".java");
+		    testCu = testPackage.getCompilationUnit(testCuName + ".java");
 		}
 	    }
 	} else {
@@ -557,18 +563,15 @@ public class JUTElements {
 	    testPackage = jutClassesAndPackages.getTestPackage();
 
 	    testCuName = testCu.getElementName().replace(".java", "");
-	    baseCuName = testCu.getElementName().replace(
-		    testClassPostfix + ".java", "");
+	    baseCuName = testCu.getElementName().replace(testClassPostfix + ".java", "");
 	    if (!"".equals(testClassPrefix)) {
 		baseCuName = baseCuName.replaceFirst(testClassPrefix, "");
 	    }
 
 	    if (jutClassesAndPackages.getBasePackages().size() == 0) {
 		if (testPackage == null) {
-		    throw new JUTWarning(
-			    "The base and test package could not be found! Test-Class-Name: "
-				    + testCuName + " Base-Class-Name: "
-				    + baseCuName);
+		    throw new JUTWarning("The base and test package could not be found! Test-Class-Name: " + testCuName
+			    + " Base-Class-Name: " + baseCuName);
 		} else {
 		    throw new JUTWarning(
 			    "The base package could not be found (perhaps moved/renamed manually or configuration is wrong)! Test-package-name: "
@@ -576,10 +579,8 @@ public class JUTElements {
 		}
 	    }
 
-	    for (IPackageFragment tmpBasePackage : jutClassesAndPackages
-		    .getBasePackages()) {
-		baseCu = tmpBasePackage
-			.getCompilationUnit(baseCuName + ".java");
+	    for (IPackageFragment tmpBasePackage : jutClassesAndPackages.getBasePackages()) {
+		baseCu = tmpBasePackage.getCompilationUnit(baseCuName + ".java");
 
 		if (baseCu != null && baseCu.exists()) {
 		    break;
@@ -602,8 +603,7 @@ public class JUTElements {
 	return jutClassesAndPackages;
     }
 
-    public static JUTElements initJUTElements(IJavaProject project)
-	    throws JUTWarning {
+    public static JUTElements initJUTElements(IJavaProject project) throws JUTWarning {
 	JUTElements jutElements = new JUTElements();
 
 	jutElements.initProjects(project);
@@ -611,8 +611,8 @@ public class JUTElements {
 	return jutElements;
     }
 
-    public static JUTElements initJUTElements(IJavaProject project,
-	    ICompilationUnit cu) throws JUTWarning, CoreException {
+    public static JUTElements initJUTElements(IJavaProject project, ICompilationUnit cu)
+	    throws JUTWarning, CoreException {
 	JUTElements jutElements = new JUTElements();
 
 	jutElements.initProjects(project, cu);
@@ -621,8 +621,8 @@ public class JUTElements {
 	return jutElements;
     }
 
-    public static JUTElements initJUTElements(IJavaProject project,
-	    IPackageFragment pack) throws JUTWarning, CoreException {
+    public static JUTElements initJUTElements(IJavaProject project, IPackageFragment pack)
+	    throws JUTWarning, CoreException {
 	JUTElements jutElements = new JUTElements();
 
 	jutElements.initProjects(project);
@@ -638,8 +638,7 @@ public class JUTElements {
      * @return JUTClassesAndPackages the initialized packages
      * @throws CoreException
      */
-    protected JUTClassesAndPackages initPackages(IPackageFragment pack)
-	    throws CoreException, JUTWarning {
+    protected JUTClassesAndPackages initPackages(IPackageFragment pack) throws CoreException, JUTWarning {
 
 	List<IPackageFragmentRoot> baseSrcFolders = new ArrayList<IPackageFragmentRoot>();
 	IPackageFragmentRoot testSrcFolder = null;
@@ -671,19 +670,15 @@ public class JUTElements {
 		} else if ("".equals(basePackageName)) {
 		    testPackageName = testPackagePostfix;
 		} else if (basePackageName.startsWith(baseProjectName)) {
-		    testPackageName = basePackageName.replace(baseProjectName,
-			    testProjectName);
+		    testPackageName = basePackageName.replace(baseProjectName, testProjectName);
 		    testPackageName += testPackagePostfix;
 		} else {
-		    testPackageName = basePackageName + "."
-			    + testPackagePostfix;
+		    testPackageName = basePackageName + "." + testPackagePostfix;
 		}
 
-		testSrcFolder = getTestSourceFolder(projects.getTestProject(),
-			basePackage);
+		testSrcFolder = getTestSourceFolder(projects.getTestProject(), basePackage);
 
-		testPackage = JDTUtils.getPackage(projects.getTestProject(),
-			testSrcFolder, testPackageName, false);
+		testPackage = JDTUtils.getPackage(projects.getTestProject(), testSrcFolder, testPackageName, false);
 	    }
 	} else {
 	    testPackage = pack;
@@ -696,25 +691,20 @@ public class JUTElements {
 	    } else if (testPackagePostfix.equals(testPackageName)) {
 		basePackageName = ""; // default package
 	    } else {
-		int lastIndexOf = testPackageName
-			.lastIndexOf(testPackagePostfix);
+		int lastIndexOf = testPackageName.lastIndexOf(testPackagePostfix);
 
 		if (lastIndexOf > -1) {
 		    basePackageName = testPackageName.substring(0, lastIndexOf);
 		} else {
-		    throw new JUTWarning(
-			    "The base package could not be found! Test-package-name: "
-				    + testPackageName);
+		    throw new JUTWarning("The base package could not be found! Test-package-name: " + testPackageName);
 		}
 
 	    }
 
-	    baseSrcFolders = getBaseSourceFolders(projects.getBaseProject(),
-		    testPackage);
+	    baseSrcFolders = getBaseSourceFolders(projects.getBaseProject(), testPackage);
 
 	    for (IPackageFragmentRoot root : baseSrcFolders) {
-		basePackage = JDTUtils.getPackage(projects.getBaseProject(),
-			root, basePackageName, false);
+		basePackage = JDTUtils.getPackage(projects.getBaseProject(), root, basePackageName, false);
 		if (basePackage != null && basePackage.exists()) {
 		    basePackages.add(basePackage);
 		}
@@ -737,8 +727,7 @@ public class JUTElements {
 	return jutClassesAndPackages;
     }
 
-    private List<IPackageFragmentRoot> getBaseSourceFolders(
-	    IJavaProject baseProject, IPackageFragment testPackage)
+    private List<IPackageFragmentRoot> getBaseSourceFolders(IJavaProject baseProject, IPackageFragment testPackage)
 	    throws CoreException {
 	IJavaElement parent = testPackage.getParent();
 
@@ -756,18 +745,16 @@ public class JUTElements {
 
 	    // delete test source folder segment
 	    onlyFolderPath = onlyFolderPath.removeLastSegments(1);
-	    
+
 	    // add default source folder name for base
 	    basePath = onlyFolderPath.append("src");
 
 	    // search for relevant folders
 	    IPath pathToCompare;
-	    for (IPackageFragmentRoot root : baseProject
-		    .getPackageFragmentRoots()) {
+	    for (IPackageFragmentRoot root : baseProject.getPackageFragmentRoots()) {
 		pathToCompare = root.getPath().removeFirstSegments(1);
-		
-		if (pathToCompare.matchingFirstSegments(basePath) == basePath
-			.segmentCount()) {
+
+		if (pathToCompare.matchingFirstSegments(basePath) == basePath.segmentCount()) {
 		    baseSourceFolders.add(root);
 		}
 	    }
@@ -783,8 +770,8 @@ public class JUTElements {
 	return baseSourceFolders;
     }
 
-    private IPackageFragmentRoot getTestSourceFolder(IJavaProject testProject,
-	    IPackageFragment basePackage) throws CoreException, JUTWarning {
+    private IPackageFragmentRoot getTestSourceFolder(IJavaProject testProject, IPackageFragment basePackage)
+	    throws CoreException, JUTWarning {
 	List<String> testSegments = new ArrayList<String>();
 
 	IJavaElement parent = basePackage.getParent();
@@ -793,8 +780,7 @@ public class JUTElements {
 
 	    for (String segment : baseRoot.getPath().segments()) {
 
-		if (segment.equals(basePackage.getJavaProject()
-			.getElementName())
+		if (segment.equals(basePackage.getJavaProject().getElementName())
 			|| segment.equals(testProject.getElementName())) {
 		    continue;
 		}
@@ -822,8 +808,7 @@ public class JUTElements {
 
 	IPath testPath = new Path(testFullPath);
 
-	IPackageFragmentRoot testSourceFolder = JDTUtils.createSourceFolder(
-		testProject, testPath);
+	IPackageFragmentRoot testSourceFolder = JDTUtils.createSourceFolder(testProject, testPath);
 	return testSourceFolder;
     }
 

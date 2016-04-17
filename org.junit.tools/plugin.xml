@@ -397,17 +397,29 @@
  
    <extension
      point="org.eclipse.ui.preferencePages">
-  <page
+  	<page
         class="org.junit.tools.ui.preferences.JUTPreferenceMainPage"
         id="org.junit.tools.ui.preferencepage"
         name="JUnit-Tools">
-  </page>
-  <page
+  	</page>
+    <page
+        category="org.junit.tools.ui.preferencepage"
+        class="org.junit.tools.ui.preferences.JUTPreferenceAnnotationsPage"
+        id="org.junit.tools.ui.annotations"
+        name="Annotations">
+  	</page>
+	<page
         category="org.junit.tools.ui.preferencepage"
         class="org.junit.tools.ui.preferences.JUTPreferenceFilterPage"
         id="org.junit.tools.ui.filter"
         name="Filter">
-  </page>
+  	</page>
+    <page
+        category="org.junit.tools.ui.preferencepage"
+        class="org.junit.tools.ui.preferences.JUTPreferenceStaticBindingsPage"
+        id="org.junit.tools.ui.staticbindings"
+        name="Static bindings">
+  	</page>  	
    </extension>
   
    <extension

@@ -580,6 +580,11 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
 
 	// create generator-annotation
 	annotations.append(createAnnoGenerated());
+	
+	String[] testClassAnnotations = JUTPreferences.getTestClassAnnotations();
+	for (String additionalAnno : testClassAnnotations) {
+	    annotations.append(additionalAnno).append(RETURN);
+	}
 
 	// test-priority-annotation
 	// TODO test prioririty deactivated

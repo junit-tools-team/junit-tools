@@ -1,5 +1,7 @@
 package org.junit.tools.preferences;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -14,9 +16,6 @@ import org.junit.tools.Activator;
  * 
  */
 public class JUTPreferences implements IJUTPreferenceConstants {
-
-    // delimiter for lists
-    private static String LIST_DELIMITER = ";";
 
     // from main-page
     private static Boolean writeTML = null;
@@ -41,11 +40,21 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 
     private static String mockProject = null;
 
+    // from annotations-page
+    private static String[] testClassAnnotations = null;
+
+    private static String[] mockClassAnnotations = null;
+
     // from filter-page
     private static String[] testMethodFilterName = null;
 
     private static String[] testMethodFilterModifier = null;
 
+    // from static-bindings-page
+    private static String[] staticBindings = null;
+    private static Map<String, String> staticBindingsMapBase = null;
+    private static Map<String, String> staticBindingsMapTest = null;
+    
     public static boolean getPreferenceBoolean(String name) {
 	return getPreferenceStore().getBoolean(name);
     }
@@ -93,12 +102,38 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 	return testMethodPostfix;
     }
 
+    protected static void setMockClassAnnotations(String[] mockClassAnnotations) {
+	JUTPreferences.mockClassAnnotations = mockClassAnnotations;
+    }
+
+    protected static void setTestClassAnnotations(String[] testClassAnnotations) {
+	JUTPreferences.testClassAnnotations = testClassAnnotations;
+    }
+
+    public static String[] getTestClassAnnotations() {
+	if (testClassAnnotations == null) {
+	    testClassAnnotations = convert(getPreference(TEST_CLASS_ANNOTATIONS));
+	}
+	return testClassAnnotations;
+    }
+
+    public static String[] getMockClassAnnotations() {
+	if (mockClassAnnotations == null) {
+	    mockClassAnnotations = convert(getPreference(MOCK_CLASS_ANNOTATIONS));
+	}
+	return mockClassAnnotations;
+    }
+
+    protected static void setStaticBindings(String[] staticBindings) {
+	JUTPreferences.staticBindings = staticBindings;
+	initStaticBindingsMaps();
+    }
+    
     protected static void setTestMethodFilterName(String[] testMethodFilterName) {
 	JUTPreferences.testMethodFilterName = testMethodFilterName;
     }
 
-    protected static void setTestMethodFilterModifier(
-	    String[] testmethodFilterModifier) {
+    protected static void setTestMethodFilterModifier(String[] testmethodFilterModifier) {
 	JUTPreferences.testMethodFilterModifier = testmethodFilterModifier;
     }
 
@@ -115,7 +150,54 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 	}
 	return testMethodFilterModifier;
     }
+    
+    public static String[] getStaticBindings() {
+	if (staticBindings == null) {
+	    staticBindings = convert(getPreference(STATIC_BINDINGS));
+	}
+	return staticBindings;
+    }
 
+    
+    
+    private static void initStaticBindingsMaps() {
+	if (staticBindings == null) {
+	    staticBindings = getStaticBindings();
+	}
+	
+	staticBindingsMapBase = new HashMap<String, String>();
+	staticBindingsMapTest = new HashMap<String, String>();
+	
+	for (String staticBinding : staticBindings) {
+	    String baseProject, testProject;
+	    String[] projects = staticBinding.split(LIST_ENTRY_SEPERATOR);
+	    
+	    if (projects.length == 2) {
+		baseProject = projects[0];
+		testProject = projects[1];
+		
+		staticBindingsMapBase.put(baseProject, testProject);
+		staticBindingsMapTest.put(testProject, baseProject);
+	    }
+	}
+    }
+
+    public static Map<String, String> getStaticBindingsMapBaseProject() {
+	if (staticBindingsMapBase == null) {
+	    initStaticBindingsMaps();
+	}
+	
+	return staticBindingsMapBase;
+    }
+    
+    public static Map<String, String> getStaticBindingsMapTestProject() {
+	if (staticBindingsMapTest== null) {
+	    initStaticBindingsMaps();
+	}
+	
+	return staticBindingsMapTest;
+    }
+    
     protected static void setTmlContainer(String tmlContainerPref) {
 	JUTPreferences.tmlContainer = tmlContainerPref;
     }
@@ -156,89 +238,7 @@ public class JUTPreferences implements IJUTPreferenceConstants {
     protected static void setTestClassSuperType(String testClassSuperType) {
 	JUTPreferences.testClassSuperType = testClassSuperType;
     }
-
-    /**
-     * Converter for lists
-     * 
-     * @param value
-     * @return Array with list-entries
-     */
-    public static String[] convert(String value) {
-	StringTokenizer tokenizer = new StringTokenizer(value, LIST_DELIMITER);
-	int tokenCount = tokenizer.countTokens();
-	String[] elements = new String[tokenCount];
-
-	for (int i = 0; i < tokenCount; i++) {
-	    elements[i] = tokenizer.nextToken();
-	}
-
-	return elements;
-    }
-
-    /**
-     * Converter for lists
-     * 
-     * @return value
-     */
-    public static String convert(String[] values) {
-	StringBuffer buffer = new StringBuffer();
-	for (int i = 0; i < values.length; i++) {
-	    buffer.append(values[i]);
-	    buffer.append(LIST_DELIMITER);
-	}
-
-	return buffer.toString();
-    }
-
-    public static void initialize() {
-	getPreferenceStore().addPropertyChangeListener(
-		new IPropertyChangeListener() {
-
-		    @Override
-		    public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty() == TEST_PROJECT_POSTFIX) {
-			    setTestProjectPostfix((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == TEST_SOURCE_FOLDER_NAME) {
-			    setTestSourceFolderName((String) event
-				    .getNewValue());
-			    return;
-			} else if (event.getProperty() == TML_CONTAINER) {
-			    setTmlContainer((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == WRITE_TML) {
-			    setWriteTML((Boolean) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == TEST_PACKAGE_POSTFIX) {
-			    setTestPackagePostfix((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == TEST_METHOD_PREFIX) {
-			    setTestMethodPrefix((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == TEST_METHOD_POSTFIX) {
-			    setTestMethodPostfix((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == TEST_METHOD_FILTER_MODIFIER) {
-			    setTestMethodFilterModifier(convert((String) event
-				    .getNewValue()));
-			    return;
-			} else if (event.getProperty() == TEST_CLASS_SUPER_TYPE) {
-			    setTestClassSuperType((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == TEST_CLASS_PREFIX) {
-			    setTestClassPrefix((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == TEST_CLASS_POSTFIX) {
-			    setTestClassPostfix((String) event.getNewValue());
-			    return;
-			} else if (event.getProperty() == MOCK_PROJECT) {
-			    setMockProject((String) event.getNewValue());
-			    return;
-			}
-		    }
-
-		});
-    }
+    
 
     protected static void setTestPackagePostfix(String newValue) {
 	JUTPreferences.testPackagePostfix = newValue;
@@ -282,6 +282,95 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 
     public static void setMockProject(String mockProject) {
 	JUTPreferences.mockProject = mockProject;
+    }
+
+    /**
+     * Converter for lists
+     * 
+     * @param value
+     * @return Array with list-entries
+     */
+    public static String[] convert(String value) {
+	StringTokenizer tokenizer = new StringTokenizer(value, LIST_DELIMITER);
+	int tokenCount = tokenizer.countTokens();
+	String[] elements = new String[tokenCount];
+
+	for (int i = 0; i < tokenCount; i++) {
+	    elements[i] = tokenizer.nextToken();
+	}
+
+	return elements;
+    }
+
+    /**
+     * Converter for lists
+     * 
+     * @return value
+     */
+    public static String convert(String[] values) {
+	StringBuffer buffer = new StringBuffer();
+	for (int i = 0; i < values.length; i++) {
+	    buffer.append(values[i]);
+	    buffer.append(LIST_DELIMITER);
+	}
+
+	return buffer.toString();
+    }
+
+    public static void initialize() {
+	getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+
+	    @Override
+	    public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty() == TEST_PROJECT_POSTFIX) {
+		    setTestProjectPostfix((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_SOURCE_FOLDER_NAME) {
+		    setTestSourceFolderName((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TML_CONTAINER) {
+		    setTmlContainer((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == WRITE_TML) {
+		    setWriteTML((Boolean) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_PACKAGE_POSTFIX) {
+		    setTestPackagePostfix((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_METHOD_PREFIX) {
+		    setTestMethodPrefix((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_METHOD_POSTFIX) {
+		    setTestMethodPostfix((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_METHOD_FILTER_MODIFIER) {
+		    setTestMethodFilterModifier(convert((String) event.getNewValue()));
+		    return;
+		} else if (event.getProperty() == TEST_CLASS_SUPER_TYPE) {
+		    setTestClassSuperType((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_CLASS_PREFIX) {
+		    setTestClassPrefix((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_CLASS_POSTFIX) {
+		    setTestClassPostfix((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == MOCK_PROJECT) {
+		    setMockProject((String) event.getNewValue());
+		    return;
+		} else if (event.getProperty() == TEST_CLASS_ANNOTATIONS) {
+		    setTestClassAnnotations(convert((String) event.getNewValue()));
+		    return;
+		} else if (event.getProperty() == MOCK_CLASS_ANNOTATIONS) {
+		    setMockClassAnnotations(convert((String) event.getNewValue()));
+		    return;
+		} else if (event.getProperty() == STATIC_BINDINGS) {
+		    setStaticBindings(convert((String) event.getNewValue()));
+		    return;
+		}
+	    }
+
+	});
     }
 
 }
