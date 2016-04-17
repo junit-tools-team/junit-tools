@@ -35,735 +35,701 @@ import org.junit.tools.ui.generator.wizards.IMethodeSelectionChangedListener;
 
 public class GroupMethodSelectionCtrl implements IGeneratorConstants {
 
-    private final Logger logger = Logger
-	    .getLogger(GroupMethodSelectionCtrl.class.getName());
+	private final Logger logger = Logger.getLogger(GroupMethodSelectionCtrl.class.getName());
 
-    private ViewerFilterMethods viewerFilterMethods;
+	private ViewerFilterMethods viewerFilterMethods;
 
-    private final Vector<IMethod> checkedMethods = new Vector<IMethod>();
+	private final Vector<IMethod> checkedMethods = new Vector<IMethod>();
 
-    private GroupMethodSelectionView group;
+	private GroupMethodSelectionView group;
 
-    private final Vector<IMethodeSelectionChangedListener> listeners = new Vector<IMethodeSelectionChangedListener>();
+	private final Vector<IMethodeSelectionChangedListener> listeners = new Vector<IMethodeSelectionChangedListener>();
 
-    // filter-instances for the methods
-    private final Vector<String> nameFilterStartsWith = new Vector<String>();
+	// filter-instances for the methods
+	private final Vector<String> nameFilterStartsWith = new Vector<String>();
 
-    private final Vector<String> nameFilterEquals = new Vector<String>();
+	private final Vector<String> nameFilterEquals = new Vector<String>();
 
-    private final Vector<String> nameFilterEndsWith = new Vector<String>();
+	private final Vector<String> nameFilterEndsWith = new Vector<String>();
 
-    private boolean modifierFilterSelected = true;
+	private boolean modifierFilterSelected = true;
 
-    private boolean nameFilterSelected = true;
+	private boolean nameFilterSelected = true;
 
-    private boolean existingMethodsFilterSelected = true;
+	private boolean existingMethodsFilterSelected = true;
 
-    // checked methods
-    private Vector<IMethod> baseClassMethods = null;
+	// checked methods
+	private Vector<IMethod> baseClassMethods = null;
 
-    private GeneratorModel model;
+	private GeneratorModel model;
 
-    private IJavaElement treeClass;
+	private IJavaElement treeClass;
 
-    private HashMap<MethodRef, IMethod> existingMethods;
+	private HashMap<MethodRef, IMethod> existingMethods;
 
-    /**
-     * The filter for the methods.
-     * 
-     * @author Robert Streng
-     */
-    private class ViewerFilterMethods extends ViewerFilter {
+	/**
+	 * The filter for the methods.
+	 * 
+	 * @author Robert Streng
+	 */
+	private class ViewerFilterMethods extends ViewerFilter {
 
-	private final List<Method> tmlMethods;
+		private final List<Method> tmlMethods;
 
-	public ViewerFilterMethods(List<Method> tmlMethods) {
-	    this.tmlMethods = tmlMethods;
-	}
-
-	@Override
-	public boolean select(Viewer viewer, Object parentElement,
-		Object element) {
-
-	    IMethod method;
-	    if (element instanceof IMethod) {
-		method = (IMethod) element;
-
-		try {
-		    if (method.isConstructor()) {
-			return false;
-		    }
-
-		    if (isExistingMethodsFilterSelected()) {
-			if (JUTPreferences.isWriteTML()) {
-			    if (tmlMethods != null
-				    && containMethod(method, tmlMethods)) {
-				return false;
-			    }
-			} else {
-			    // if (clazz != null) { // && containMethod(method,
-			    // clazz)) {
-			    // return false;
-			    // }
-			}
-
-			if (existingMethods != null
-				&& existingMethods.size() > 0) {
-			    if (GeneratorUtils.findMethod(
-				    existingMethods.keySet(), method) != null) {
-				return false;
-			    }
-			}
-		    }
-
-		    if (!isMethodAllowed(method, isNameFilterSelected(),
-			    isModifierFilterSelected())) {
-			return false;
-		    }
-
-		} catch (JavaModelException e) {
-		    throw new RuntimeException(e);
+		public ViewerFilterMethods(List<Method> tmlMethods) {
+			this.tmlMethods = tmlMethods;
 		}
 
-		return true;
-	    } else if (element instanceof IType
-		    && !(parentElement instanceof IType)) {
-		return true;
-	    }
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
 
-	    return false;
-	}
-    }
+			IMethod method;
+			if (element instanceof IMethod) {
+				method = (IMethod) element;
 
-    /**
-     * The check state provider for the methods.
-     * 
-     * @author Robert Streng
-     */
-    class CheckStateProvider implements ICheckStateProvider {
+				try {
+					if (method.isConstructor()) {
+						return false;
+					}
 
-	@Override
-	public boolean isChecked(Object element) {
-	    if (getCheckedMethods().contains(element)) {
-		return true;
-	    }
+					if (isExistingMethodsFilterSelected()) {
+						if (JUTPreferences.isWriteTML()) {
+							if (tmlMethods != null && containMethod(method, tmlMethods)) {
+								return false;
+							}
+						} else {
+							// if (clazz != null) { // && containMethod(method,
+							// clazz)) {
+							// return false;
+							// }
+						}
 
-	    if (element instanceof IJavaElement) {
-		IJavaElement javaElement = (IJavaElement) element;
-		if (isParentChecked(javaElement.getParent())) {
-		    return true;
-		}
-	    }
+						if (existingMethods != null && existingMethods.size() > 0) {
+							if (GeneratorUtils.findMethod(existingMethods.keySet(), method) != null) {
+								return false;
+							}
+						}
+					}
 
-	    return false;
-	}
+					if (!isMethodAllowed(method, isNameFilterSelected(), isModifierFilterSelected())) {
+						return false;
+					}
 
-	private boolean isParentChecked(IJavaElement element) {
-	    if (element == null) {
-		return false;
-	    }
-	    if (element instanceof IMethod) {
-		if (getCheckedMethods().contains(element)) {
-		    return true;
-		}
-	    }
-
-	    return isParentChecked(element.getParent());
-	}
-
-	@Override
-	public boolean isGrayed(Object element) {
-	    return getGroup().getCheckboxTreeViewer().getGrayed(element);
-	}
-    }
-
-    private void addInternalListener(GroupMethodSelectionView grp) {
-	grp.getBtnSelectAll().addSelectionListener(new SelectionAdapter() {
-
-	    @Override
-	    public void widgetSelected(SelectionEvent e) {
-		try {
-		    handleSelectAll();
-		} catch (JavaModelException e1) {
-		    logger.log(Level.SEVERE, e1.getMessage());
-		}
-	    }
-	});
-
-	grp.getBtnDeselectAll().addSelectionListener(new SelectionAdapter() {
-
-	    @Override
-	    public void widgetSelected(SelectionEvent e) {
-		try {
-		    handleDeselectAll();
-		} catch (JavaModelException e1) {
-		    logger.log(Level.SEVERE, e1.getMessage());
-		}
-	    }
-	});
-
-	grp.getBtnNamefilter().addSelectionListener(new SelectionAdapter() {
-
-	    @Override
-	    public void widgetSelected(SelectionEvent e) {
-		handleNameFilterSelection();
-	    }
-	});
-
-	grp.getBtnModifierfilter().addSelectionListener(new SelectionAdapter() {
-
-	    @Override
-	    public void widgetSelected(SelectionEvent e) {
-		handleModifierFilterSelection();
-	    }
-	});
-
-	grp.getBtnExistingMethodsFilter().addSelectionListener(
-		new SelectionAdapter() {
-
-		    @Override
-		    public void widgetSelected(SelectionEvent e) {
-			handleExistingMethodsFilterSelection();
-		    }
-		});
-
-	grp.getCheckboxTreeViewer().addCheckStateListener(
-		new ICheckStateListener() {
-
-		    @Override
-		    public void checkStateChanged(CheckStateChangedEvent event) {
-			Object element = event.getElement();
-
-			try {
-			    if (element instanceof IMethod) {
-				handleMethodSelection(event.getChecked(),
-					(IMethod) element);
-			    } else if (element instanceof IType) {
-				if (event.getChecked()) {
-				    handleSelectAll();
-				} else {
-				    handleDeselectAll();
+				} catch (JavaModelException e) {
+					throw new RuntimeException(e);
 				}
-			    }
-			} catch (JavaModelException e) {
-			    // nothing
+
+				return true;
+			} else if (element instanceof IType && !(parentElement instanceof IType)) {
+				return true;
 			}
 
-			methodSelectionChanged();
-		    }
+			return false;
+		}
+	}
 
-		    private void handleMethodSelection(boolean checked,
-			    IMethod element) throws JavaModelException {
-			if (element.isConstructor()) {
-			    return;
+	/**
+	 * The check state provider for the methods.
+	 * 
+	 * @author Robert Streng
+	 */
+	class CheckStateProvider implements ICheckStateProvider {
+
+		@Override
+		public boolean isChecked(Object element) {
+			if (getCheckedMethods().contains(element)) {
+				return true;
 			}
 
-			if (checked) {
-			    if (!checkedMethods.contains(element)) {
-				checkedMethods.add(element);
-			    }
-			} else {
-			    checkedMethods.remove(element);
+			if (element instanceof IJavaElement) {
+				IJavaElement javaElement = (IJavaElement) element;
+				if (isParentChecked(javaElement.getParent())) {
+					return true;
+				}
 			}
 
-		    }
+			return false;
+		}
+
+		private boolean isParentChecked(IJavaElement element) {
+			if (element == null) {
+				return false;
+			}
+			if (element instanceof IMethod) {
+				if (getCheckedMethods().contains(element)) {
+					return true;
+				}
+			}
+
+			return isParentChecked(element.getParent());
+		}
+
+		@Override
+		public boolean isGrayed(Object element) {
+			return getGroup().getCheckboxTreeViewer().getGrayed(element);
+		}
+	}
+
+	private void addInternalListener(GroupMethodSelectionView grp) {
+		grp.getBtnSelectAll().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					handleSelectAll();
+				} catch (JavaModelException e1) {
+					logger.log(Level.SEVERE, e1.getMessage());
+				}
+			}
 		});
 
-    }
+		grp.getBtnDeselectAll().addSelectionListener(new SelectionAdapter() {
 
-    public void deactivateFilters() {
-	group.getBtnExistingMethodsFilter().setSelection(false);
-	group.getBtnModifierfilter().setSelection(false);
-	group.getBtnNamefilter().setSelection(false);
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					handleDeselectAll();
+				} catch (JavaModelException e1) {
+					logger.log(Level.SEVERE, e1.getMessage());
+				}
+			}
+		});
 
-	handleExistingMethodsFilterSelection();
-	handleModifierFilterSelection();
-	handleNameFilterSelection();
-    }
+		grp.getBtnNamefilter().addSelectionListener(new SelectionAdapter() {
 
-    public void init(GroupMethodSelectionView grp, IJavaElement javaElement,
-	    List<Method> tmlMethods, GeneratorModel utmModel)
-	    throws JavaModelException {
-	this.viewerFilterMethods = new ViewerFilterMethods(tmlMethods);
-	initReal(grp, javaElement, utmModel);
-    }
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handleNameFilterSelection();
+			}
+		});
 
-    public void init(GroupMethodSelectionView grp, IJavaElement javaElement,
-	    ICompilationUnit testClass, GeneratorModel utmModel)
-	    throws JavaModelException {
-	initReal(grp, javaElement, utmModel);
-    }
+		grp.getBtnModifierfilter().addSelectionListener(new SelectionAdapter() {
 
-    public void init(GroupMethodSelectionView grp, IJavaElement javaElement)
-	    throws JavaModelException {
-	initReal(grp, javaElement, null);
-    }
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handleModifierFilterSelection();
+			}
+		});
 
-    private void initReal(GroupMethodSelectionView grp,
-	    IJavaElement javaElement, GeneratorModel jutModel)
-	    throws JavaModelException {
-	this.group = grp;
-	this.model = jutModel;
-	this.treeClass = javaElement;
+		grp.getBtnExistingMethodsFilter().addSelectionListener(new SelectionAdapter() {
 
-	if (viewerFilterMethods == null) {
-	    this.viewerFilterMethods = new ViewerFilterMethods(null);
-	    group.getCheckboxTreeViewer().addFilter(viewerFilterMethods);
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handleExistingMethodsFilterSelection();
+			}
+		});
+
+		grp.getCheckboxTreeViewer().addCheckStateListener(new ICheckStateListener() {
+
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				Object element = event.getElement();
+
+				try {
+					if (element instanceof IMethod) {
+						handleMethodSelection(event.getChecked(), (IMethod) element);
+					} else if (element instanceof IType) {
+						if (event.getChecked()) {
+							handleSelectAll();
+						} else {
+							handleDeselectAll();
+						}
+					}
+				} catch (JavaModelException e) {
+					// nothing
+				}
+
+				methodSelectionChanged();
+			}
+
+			private void handleMethodSelection(boolean checked, IMethod element) throws JavaModelException {
+				if (element.isConstructor()) {
+					return;
+				}
+
+				if (checked) {
+					if (!checkedMethods.contains(element)) {
+						checkedMethods.add(element);
+					}
+				} else {
+					checkedMethods.remove(element);
+				}
+
+			}
+		});
+
 	}
 
-	group.getCheckboxTreeViewer().setCheckStateProvider(
-		new CheckStateProvider());
-	group.getCheckboxTreeViewer().setInput(javaElement);
-	group.getCheckboxTreeViewer().expandAll();
-	group.getCheckboxTreeViewer().setComparator(new ViewerComparator() {
+	public void deactivateFilters() {
+		group.getBtnExistingMethodsFilter().setSelection(false);
+		group.getBtnModifierfilter().setSelection(false);
+		group.getBtnNamefilter().setSelection(false);
 
-	    @Override
-	    public int compare(Viewer viewer, Object e1, Object e2) {
-		if (e1 instanceof IMethod && e2 instanceof IMethod) {
-		    IMethod m1, m2;
-		    m1 = (IMethod) e1;
-		    m2 = (IMethod) e2;
+		handleExistingMethodsFilterSelection();
+		handleModifierFilterSelection();
+		handleNameFilterSelection();
+	}
 
-		    return m1.getElementName().compareTo(m2.getElementName());
+	public void init(GroupMethodSelectionView grp, IJavaElement javaElement, List<Method> tmlMethods,
+			GeneratorModel utmModel) throws JavaModelException {
+		this.viewerFilterMethods = new ViewerFilterMethods(tmlMethods);
+		initReal(grp, javaElement, utmModel);
+	}
+
+	public void init(GroupMethodSelectionView grp, IJavaElement javaElement, ICompilationUnit testClass,
+			GeneratorModel utmModel) throws JavaModelException {
+		initReal(grp, javaElement, utmModel);
+	}
+
+	public void init(GroupMethodSelectionView grp, IJavaElement javaElement) throws JavaModelException {
+		initReal(grp, javaElement, null);
+	}
+
+	private void initReal(GroupMethodSelectionView grp, IJavaElement javaElement, GeneratorModel jutModel)
+			throws JavaModelException {
+		this.group = grp;
+		this.model = jutModel;
+		this.treeClass = javaElement;
+
+		if (viewerFilterMethods == null) {
+			this.viewerFilterMethods = new ViewerFilterMethods(null);
+			group.getCheckboxTreeViewer().addFilter(viewerFilterMethods);
 		}
 
-		return super.compare(viewer, e1, e2);
-	    }
-	});
+		group.getCheckboxTreeViewer().setCheckStateProvider(new CheckStateProvider());
+		group.getCheckboxTreeViewer().setInput(javaElement);
+		group.getCheckboxTreeViewer().expandAll();
+		group.getCheckboxTreeViewer().setComparator(new ViewerComparator() {
 
-	initNameFilters();
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if (e1 instanceof IMethod && e2 instanceof IMethod) {
+					IMethod m1, m2;
+					m1 = (IMethod) e1;
+					m2 = (IMethod) e2;
 
-	// initialize existing methods
-	initCheckedMethods();
+					return m1.getElementName().compareTo(m2.getElementName());
+				}
 
-	group.getCheckboxTreeViewer().refresh();
+				return super.compare(viewer, e1, e2);
+			}
+		});
 
-	addInternalListener(grp);
-    }
+		initNameFilters();
 
-    /**
-     * Selects or deselects all methods.
-     * 
-     * @param state
-     * @throws JavaModelException
-     */
-    private void selectAll(boolean state) {
-	CheckboxTreeViewer checkboxTreeViewer = getGroup()
-		.getCheckboxTreeViewer();
-	ITreeContentProvider contentProvider = (ITreeContentProvider) checkboxTreeViewer
-		.getContentProvider();
-	Object[] objects = contentProvider.getElements(checkboxTreeViewer
-		.getInput());
+		// initialize existing methods
+		initCheckedMethods();
 
-	for (Object object : objects) {
-	    checkboxTreeViewer.setChecked(object, state);
+		group.getCheckboxTreeViewer().refresh();
+
+		addInternalListener(grp);
 	}
 
-	for (IMethod method : getBaseClassMethods()) {
-	    if (viewerFilterMethods.select(null, method.getParent(), method)) {
-		if (state) {
-		    checkedMethods.add(method);
-		} else {
-		    checkedMethods.remove(method);
+	/**
+	 * Selects or deselects all methods.
+	 * 
+	 * @param state
+	 * @throws JavaModelException
+	 */
+	private void selectAll(boolean state) {
+		CheckboxTreeViewer checkboxTreeViewer = getGroup().getCheckboxTreeViewer();
+		ITreeContentProvider contentProvider = (ITreeContentProvider) checkboxTreeViewer.getContentProvider();
+		Object[] objects = contentProvider.getElements(checkboxTreeViewer.getInput());
+
+		for (Object object : objects) {
+			checkboxTreeViewer.setChecked(object, state);
 		}
-	    }
+
+		for (IMethod method : getBaseClassMethods()) {
+			if (viewerFilterMethods.select(null, method.getParent(), method)) {
+				if (state) {
+					checkedMethods.add(method);
+				} else {
+					checkedMethods.remove(method);
+				}
+			}
+		}
 	}
-    }
 
-    /**
-     * Handle the select all action.
-     * 
-     * @throws JavaModelException
-     */
-    private void handleSelectAll() throws JavaModelException {
-	selectAll(true);
-	methodSelectionChanged();
-    }
-
-    private void methodSelectionChanged() {
-	for (IMethodeSelectionChangedListener listener : listeners) {
-	    listener.methodSelectionChanged(getCheckedMethods());
+	/**
+	 * Handle the select all action.
+	 * 
+	 * @throws JavaModelException
+	 */
+	private void handleSelectAll() throws JavaModelException {
+		selectAll(true);
+		methodSelectionChanged();
 	}
-    }
 
-    private void selectedMethodChecked(IMethod method) {
-	for (IMethodeSelectionChangedListener listener : listeners) {
-	    listener.selectedMethodChecked(method);
+	private void methodSelectionChanged() {
+		for (IMethodeSelectionChangedListener listener : listeners) {
+			listener.methodSelectionChanged(getCheckedMethods());
+		}
 	}
-    }
 
-    /**
-     * Handle the deselect all action.
-     * 
-     * @throws JavaModelException
-     */
-    private void handleDeselectAll() throws JavaModelException {
-	selectAll(false);
-	methodSelectionChanged();
-    }
+	private void selectedMethodChecked(IMethod method) {
+		for (IMethodeSelectionChangedListener listener : listeners) {
+			listener.selectedMethodChecked(method);
+		}
+	}
 
-    /**
-     * Handle the name filter selecion.
-     */
-    private void handleNameFilterSelection() {
-	nameFilterSelected = getGroup().getBtnNamefilter().getSelection();
-	getGroup().getCheckboxTreeViewer().refresh();
-	methodSelectionChanged();
-    }
+	/**
+	 * Handle the deselect all action.
+	 * 
+	 * @throws JavaModelException
+	 */
+	private void handleDeselectAll() throws JavaModelException {
+		selectAll(false);
+		methodSelectionChanged();
+	}
 
-    /**
-     * Handle the modifier filer selection.
-     */
-    private void handleModifierFilterSelection() {
-	modifierFilterSelected = getGroup().getBtnModifierfilter()
-		.getSelection();
-	getGroup().getCheckboxTreeViewer().refresh();
-	methodSelectionChanged();
-    }
+	/**
+	 * Handle the name filter selecion.
+	 */
+	private void handleNameFilterSelection() {
+		nameFilterSelected = getGroup().getBtnNamefilter().getSelection();
+		getGroup().getCheckboxTreeViewer().refresh();
+		methodSelectionChanged();
+	}
 
-    /**
-     * Handle the existing methods filter selection.
-     */
-    private void handleExistingMethodsFilterSelection() {
-	existingMethodsFilterSelected = getGroup()
-		.getBtnExistingMethodsFilter().getSelection();
-	getGroup().getCheckboxTreeViewer().refresh();
-	methodSelectionChanged();
-    }
+	/**
+	 * Handle the modifier filer selection.
+	 */
+	private void handleModifierFilterSelection() {
+		modifierFilterSelected = getGroup().getBtnModifierfilter().getSelection();
+		getGroup().getCheckboxTreeViewer().refresh();
+		methodSelectionChanged();
+	}
 
-    /**
-     * Returns the checked methods.
-     * 
-     * @return checked methods
-     */
-    public Vector<IMethod> getCheckedMethods() {
-	return checkedMethods;
-    }
+	/**
+	 * Handle the existing methods filter selection.
+	 */
+	private void handleExistingMethodsFilterSelection() {
+		existingMethodsFilterSelected = getGroup().getBtnExistingMethodsFilter().getSelection();
+		getGroup().getCheckboxTreeViewer().refresh();
+		methodSelectionChanged();
+	}
 
-    /**
-     * Returns if the name filter is selected.
-     * 
-     * @return true if the name filter is selected
-     */
-    protected boolean isNameFilterSelected() {
-	return nameFilterSelected;
-    }
+	/**
+	 * Returns the checked methods.
+	 * 
+	 * @return checked methods
+	 */
+	public Vector<IMethod> getCheckedMethods() {
+		return checkedMethods;
+	}
 
-    /**
-     * Returns if the modifier filter is selected.
-     * 
-     * @return true if modifier filter is selected
-     */
-    protected boolean isModifierFilterSelected() {
-	return modifierFilterSelected;
-    }
+	/**
+	 * Returns if the name filter is selected.
+	 * 
+	 * @return true if the name filter is selected
+	 */
+	protected boolean isNameFilterSelected() {
+		return nameFilterSelected;
+	}
 
-    /**
-     * Returns if the existing methods filter is selected.
-     * 
-     * @return true if the existing methods filter is selected
-     */
-    protected boolean isExistingMethodsFilterSelected() {
-	return existingMethodsFilterSelected;
-    }
+	/**
+	 * Returns if the modifier filter is selected.
+	 * 
+	 * @return true if modifier filter is selected
+	 */
+	protected boolean isModifierFilterSelected() {
+		return modifierFilterSelected;
+	}
 
-    private GroupMethodSelectionView getGroup() {
-	return group;
-    }
+	/**
+	 * Returns if the existing methods filter is selected.
+	 * 
+	 * @return true if the existing methods filter is selected
+	 */
+	protected boolean isExistingMethodsFilterSelected() {
+		return existingMethodsFilterSelected;
+	}
 
-    /**
-     * Returns if the method is in the method list and add the method if not
-     * exists.
-     * 
-     * @param method
-     * @param tmlMethods
-     * @return true if method is in the method list
-     */
-    protected boolean containMethod(IMethod method, List<Method> tmlMethods) {
-	HashMap<IMethod, Method> methodMap = getModel().getMethodMap();
+	private GroupMethodSelectionView getGroup() {
+		return group;
+	}
 
-	if (methodMap.containsKey(method)) {
-	    if (methodMap.get(method) != null)
-		return true;
-	    else
+	/**
+	 * Returns if the method is in the method list and add the method if not
+	 * exists.
+	 * 
+	 * @param method
+	 * @param tmlMethods
+	 * @return true if method is in the method list
+	 */
+	protected boolean containMethod(IMethod method, List<Method> tmlMethods) {
+		HashMap<IMethod, Method> methodMap = getModel().getMethodMap();
+
+		if (methodMap.containsKey(method)) {
+			if (methodMap.get(method) != null)
+				return true;
+			else
+				return false;
+		}
+
+		Method tmlMethod = GeneratorUtils.getClosestMethod(method, tmlMethods);
+		if (tmlMethod != null) {
+			methodMap.put(method, tmlMethod);
+			return true;
+		}
+
+		methodMap.put(method, null);
 		return false;
 	}
 
-	Method tmlMethod = GeneratorUtils.getClosestMethod(method, tmlMethods);
-	if (tmlMethod != null) {
-	    methodMap.put(method, tmlMethod);
-	    return true;
-	}
+	/**
+	 * Initializes the existing methods.
+	 * 
+	 * @throws JavaModelException
+	 */
+	private void initCheckedMethods() throws JavaModelException {
+		// initialisierung via tml-model
+		if (getModel() != null && getModel().getTmlTest() != null) {
+			for (IMethod baseClassMethod : getBaseClassMethods()) {
+				if (containMethod(baseClassMethod, getModel().getTmlTest().getMethod())) {
+					checkedMethods.add(baseClassMethod);
+				}
+			}
 
-	methodMap.put(method, null);
-	return false;
-    }
-
-    /**
-     * Initializes the existing methods.
-     * 
-     * @throws JavaModelException
-     */
-    private void initCheckedMethods() throws JavaModelException {
-	// initialisierung via tml-model
-	if (getModel() != null && getModel().getTmlTest() != null) {
-	    for (IMethod baseClassMethod : getBaseClassMethods()) {
-		if (containMethod(baseClassMethod, getModel().getTmlTest()
-			.getMethod())) {
-		    checkedMethods.add(baseClassMethod);
+			return;
 		}
-	    }
 
-	    return;
-	}
+		// initialize existing methods
+		if (existingMethods == null && getModel() != null) {
+			JUTElements utmElements = getModel().getJUTElements();
+			ICompilationUnit baseClass = utmElements.getClassesAndPackages().getBaseClass();
+			ICompilationUnit testClass = utmElements.getClassesAndPackages().getTestClass();
 
-	// initialize existing methods
-	if (existingMethods == null && getModel() != null) {
-	    JUTElements utmElements = getModel().getJUTElements();
-	    ICompilationUnit baseClass = utmElements.getClassesAndPackages()
-		    .getBaseClass();
-	    ICompilationUnit testClass = utmElements.getClassesAndPackages()
-		    .getTestClass();
+			existingMethods = GeneratorUtils.getExistingTestMethods(baseClass, testClass, true);
 
-	    existingMethods = GeneratorUtils.getExistingTestMethods(baseClass,
-		    testClass, true);
-
-	    // add selected base method
-	    if (utmElements.getProjects().isBaseProjectSelected()) {
-		JUTConstructorsAndMethods constructorsAndMethods = utmElements
-			.getConstructorsAndMethods();
-		IMethod selectedMethod = constructorsAndMethods
-			.getSelectedMethod();
-		if (selectedMethod != null) {
-		    checkedMethods.add(selectedMethod);
-		    selectedMethodChecked(selectedMethod);
+			// add selected base method
+			if (utmElements.getProjects().isBaseProjectSelected()) {
+				JUTConstructorsAndMethods constructorsAndMethods = utmElements.getConstructorsAndMethods();
+				IMethod selectedMethod = constructorsAndMethods.getSelectedMethod();
+				if (selectedMethod != null) {
+					checkedMethods.add(selectedMethod);
+					selectedMethodChecked(selectedMethod);
+				}
+			}
 		}
-	    }
+
+		// initialization via methodref-annotation or via name if the
+		// method-name is unique
+		boolean nameMatched;
+		String signatureToCompare;
+		if (existingMethods != null && existingMethods.size() > 0) {
+			List<IMethod> methods;
+			try {
+				methods = JDTUtils.getMethods(treeClass, false);
+				for (IMethod method : methods) {
+
+					nameMatched = false;
+					for (MethodRef methodRef : existingMethods.keySet()) {
+						if (methodRef.isSignatureChanged()) {
+							signatureToCompare = methodRef.getSignatureNew();
+						} else {
+							signatureToCompare = methodRef.getSignature();
+						}
+
+						if (methodRef.getName().equals(method.getElementName())) {
+							if (signatureToCompare.equals(method.getSignature())) {
+								checkedMethods.add(method);
+								break;
+							} else {
+								nameMatched = true;
+							}
+						}
+					}
+
+					if (nameMatched && JDTUtils.isMethodNameUnique(method)) {
+						checkedMethods.add(method);
+					}
+
+				}
+			}
+
+			catch (JavaModelException e) {
+				// TODO
+				logger.warning(e.getMessage());
+			}
+		}
+
 	}
 
-	// initialization via methodref-annotation or via name if the
-	// method-name is unique
-	boolean nameMatched;
-	String signatureToCompare;
-	if (existingMethods != null && existingMethods.size() > 0) {
-	    List<IMethod> methods;
-	    try {
-		methods = JDTUtils.getMethods(treeClass, false);
-		for (IMethod method : methods) {
+	/**
+	 * @return base class methods
+	 * @throws JavaModelException
+	 */
+	private Vector<IMethod> getBaseClassMethods() {
+		if (getModel() == null) {
+			try {
+				return new Vector<IMethod>(JDTUtils.getMethods(treeClass, false));
+			} catch (JavaModelException e) {
+				logger.log(Level.SEVERE, e.getMessage());
+			}
 
-		    nameMatched = false;
-		    for (MethodRef methodRef : existingMethods.keySet()) {
-			if (methodRef.isSignatureChanged()) {
-			    signatureToCompare = methodRef.getSignatureNew();
+			return new Vector<IMethod>(0);
+		}
+
+		if (baseClassMethods == null) {
+			baseClassMethods = getModel().getJUTElements().getConstructorsAndMethods().getBaseClassMethods();
+		}
+
+		return baseClassMethods;
+	}
+
+	/**
+	 * Initializes the name filters.
+	 */
+	private void initNameFilters() {
+		for (String filter : JUTPreferences.getTestMethodFilterName()) {
+			if (filter.startsWith("*")) {
+				nameFilterEndsWith.add(filter.replaceFirst("*", ""));
+			} else if (filter.endsWith("*")) {
+				nameFilterStartsWith.add(filter.replace("*", ""));
 			} else {
-			    signatureToCompare = methodRef.getSignature();
+				nameFilterEquals.add(filter);
+			}
+		}
+	}
+
+	/**
+	 * Returns if the method name is allowed.
+	 * 
+	 * @param method
+	 * @return true if the method name is allowed
+	 */
+	private boolean isMethodNameAllowed(IMethod method) {
+		String methodName = method.getElementName().replace(".java", "");
+
+		Vector<String> startsWithFilter = getTestClassNameFilterStartsWith();
+		Vector<String> equalsFilter = getTestClassNameFilterEquals();
+		Vector<String> endsFilter = getTestClassNameFilterEndsWith();
+
+		for (String filter : startsWithFilter) {
+			if (methodName.startsWith(filter)) {
+				return false;
+			}
+		}
+
+		for (String filter : equalsFilter) {
+			if (methodName.equalsIgnoreCase(filter)) {
+				return false;
+			}
+		}
+
+		for (String filter : endsFilter) {
+			if (methodName.endsWith(filter)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Return if the method is allowed.
+	 * 
+	 * @param method
+	 * @param nameFilter
+	 * @param modifierFilter
+	 * @return true when the method is allowed
+	 * @throws JavaModelException
+	 */
+	private boolean isMethodAllowed(IMethod method, boolean nameFilter, boolean modifierFilter)
+			throws JavaModelException {
+		if (modifierFilter && !isModifierAllowed(method)) {
+			return false;
+		}
+
+		if (nameFilter && !isMethodNameAllowed(method)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * @return test class name filters - starts with
+	 */
+	private Vector<String> getTestClassNameFilterStartsWith() {
+		return nameFilterStartsWith;
+	}
+
+	/**
+	 * @return test class name filters - equals
+	 */
+	private Vector<String> getTestClassNameFilterEquals() {
+		return nameFilterEquals;
+	}
+
+	/**
+	 * @return test class name filters - ends with
+	 */
+	private Vector<String> getTestClassNameFilterEndsWith() {
+		return nameFilterEndsWith;
+	}
+
+	/**
+	 * Returns the junit-tools-Model with all test data.
+	 * 
+	 * @return the generator-model
+	 */
+	protected GeneratorModel getModel() {
+		return model;
+	}
+
+	/**
+	 * 
+	 * @param method
+	 * @return
+	 * @throws JavaModelException
+	 */
+	private boolean isModifierAllowed(IMethod method) throws JavaModelException {
+		String modifier = JDTUtils.getMethodModifier(method);
+
+		for (String notAllowedModifier : JUTPreferences.getTestMethodFilterModifier()) {
+
+			if (MOD_PUBLIC.equals(modifier)) {
+				if (MOD_PUBLIC.equalsIgnoreCase(notAllowedModifier)) {
+					return false;
+				}
+			} else if (MOD_PROTECTED.equals(modifier)) {
+				if (MOD_PROTECTED.equalsIgnoreCase(notAllowedModifier)) {
+					return false;
+				}
+			} else if (MOD_PRIVATE.equals(modifier)) {
+				if (MOD_PRIVATE.equalsIgnoreCase(notAllowedModifier)) {
+					return false;
+				}
+			} else if (MOD_PACKAGE.equals(modifier)) {
+				if (MOD_PACKAGE.equalsIgnoreCase(notAllowedModifier)) {
+					return false;
+				}
 			}
 
-			if (methodRef.getName().equals(method.getElementName())) {
-			    if (signatureToCompare
-				    .equals(method.getSignature())) {
-				checkedMethods.add(method);
-				break;
-			    } else {
-				nameMatched = true;
-			    }
-			}
-		    }
-
-		    if (nameMatched && JDTUtils.isMethodNameUnique(method)) {
-			checkedMethods.add(method);
-		    }
-
 		}
-	    }
 
-	    catch (JavaModelException e) {
-		// TODO
-		logger.warning(e.getMessage());
-	    }
+		return true;
 	}
 
-    }
-
-    /**
-     * @return base class methods
-     * @throws JavaModelException
-     */
-    private Vector<IMethod> getBaseClassMethods() {
-	if (getModel() == null) {
-	    try {
-		return new Vector<IMethod>(
-			JDTUtils.getMethods(treeClass, false));
-	    } catch (JavaModelException e) {
-		logger.log(Level.SEVERE, e.getMessage());
-	    }
-
-	    return new Vector<IMethod>(0);
+	public void addListener(IMethodeSelectionChangedListener methodSelectionChangedListener) {
+		this.listeners.add(methodSelectionChangedListener);
 	}
 
-	if (baseClassMethods == null) {
-	    baseClassMethods = getModel().getJUTElements()
-		    .getConstructorsAndMethods().getBaseClassMethods();
+	public void removeListener(IMethodeSelectionChangedListener methodSelectionChangedListener) {
+		this.listeners.remove(methodSelectionChangedListener);
 	}
 
-	return baseClassMethods;
-    }
-
-    /**
-     * Initializes the name filters.
-     */
-    private void initNameFilters() {
-	for (String filter : JUTPreferences.getTestMethodFilterName()) {
-	    if (filter.startsWith("*")) {
-		nameFilterEndsWith.add(filter.replaceFirst("*", ""));
-	    } else if (filter.endsWith("*")) {
-		nameFilterStartsWith.add(filter.replace("*", ""));
-	    } else {
-		nameFilterEquals.add(filter);
-	    }
-	}
-    }
-
-    /**
-     * Returns if the method name is allowed.
-     * 
-     * @param method
-     * @return true if the method name is allowed
-     */
-    private boolean isMethodNameAllowed(IMethod method) {
-	String methodName = method.getElementName().replace(".java", "");
-
-	Vector<String> startsWithFilter = getTestClassNameFilterStartsWith();
-	Vector<String> equalsFilter = getTestClassNameFilterEquals();
-	Vector<String> endsFilter = getTestClassNameFilterEndsWith();
-
-	for (String filter : startsWithFilter) {
-	    if (methodName.startsWith(filter)) {
-		return false;
-	    }
+	public void setExistingMethods(HashMap<MethodRef, IMethod> existingMethods) throws JavaModelException {
+		this.existingMethods = existingMethods;
+		initCheckedMethods();
+		handleExistingMethodsFilterSelection();
 	}
 
-	for (String filter : equalsFilter) {
-	    if (methodName.equalsIgnoreCase(filter)) {
-		return false;
-	    }
+	public HashMap<MethodRef, IMethod> getExistingMethods() {
+		return existingMethods;
 	}
-
-	for (String filter : endsFilter) {
-	    if (methodName.endsWith(filter)) {
-		return false;
-	    }
-	}
-
-	return true;
-    }
-
-    /**
-     * Return if the method is allowed.
-     * 
-     * @param method
-     * @param nameFilter
-     * @param modifierFilter
-     * @return true when the method is allowed
-     * @throws JavaModelException
-     */
-    private boolean isMethodAllowed(IMethod method, boolean nameFilter,
-	    boolean modifierFilter) throws JavaModelException {
-	if (modifierFilter && !isModifierAllowed(method)) {
-	    return false;
-	}
-
-	if (nameFilter && !isMethodNameAllowed(method)) {
-	    return false;
-	}
-
-	return true;
-    }
-
-    /**
-     * @return test class name filters - starts with
-     */
-    private Vector<String> getTestClassNameFilterStartsWith() {
-	return nameFilterStartsWith;
-    }
-
-    /**
-     * @return test class name filters - equals
-     */
-    private Vector<String> getTestClassNameFilterEquals() {
-	return nameFilterEquals;
-    }
-
-    /**
-     * @return test class name filters - ends with
-     */
-    private Vector<String> getTestClassNameFilterEndsWith() {
-	return nameFilterEndsWith;
-    }
-
-    /**
-     * Returns the junit-tools-Model with all test data.
-     * 
-     * @return the generator-model
-     */
-    protected GeneratorModel getModel() {
-	return model;
-    }
-
-    /**
-     * 
-     * @param method
-     * @return
-     * @throws JavaModelException
-     */
-    private boolean isModifierAllowed(IMethod method) throws JavaModelException {
-	String modifier = JDTUtils.getMethodModifier(method);
-
-	for (String notAllowedModifier : JUTPreferences
-		.getTestMethodFilterModifier()) {
-
-	    if (MOD_PUBLIC.equals(modifier)) {
-		if (MOD_PUBLIC.equalsIgnoreCase(notAllowedModifier)) {
-		    return false;
-		}
-	    } else if (MOD_PROTECTED.equals(modifier)) {
-		if (MOD_PROTECTED.equalsIgnoreCase(notAllowedModifier)) {
-		    return false;
-		}
-	    } else if (MOD_PRIVATE.equals(modifier)) {
-		if (MOD_PRIVATE.equalsIgnoreCase(notAllowedModifier)) {
-		    return false;
-		}
-	    } else if (MOD_PACKAGE.equals(modifier)) {
-		if (MOD_PACKAGE.equalsIgnoreCase(notAllowedModifier)) {
-		    return false;
-		}
-	    }
-
-	}
-
-	return true;
-    }
-
-    public void addListener(
-	    IMethodeSelectionChangedListener methodSelectionChangedListener) {
-	this.listeners.add(methodSelectionChangedListener);
-    }
-
-    public void removeListener(
-	    IMethodeSelectionChangedListener methodSelectionChangedListener) {
-	this.listeners.remove(methodSelectionChangedListener);
-    }
-
-    public void setExistingMethods(HashMap<MethodRef, IMethod> existingMethods)
-	    throws JavaModelException {
-	this.existingMethods = existingMethods;
-	initCheckedMethods();
-	handleExistingMethodsFilterSelection();
-    }
-
-    public HashMap<MethodRef, IMethod> getExistingMethods() {
-	return existingMethods;
-    }
 
 }
