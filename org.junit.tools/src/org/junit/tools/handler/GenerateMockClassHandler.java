@@ -26,55 +26,55 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
  */
 public class GenerateMockClassHandler extends JUTHandler {
 
-    /**
-     * {@link Inherited}
-     */
-    @Override
-    public Object execute(ExecutionEvent event) throws ExecutionException {
-	IWorkbenchWindow activeWorkbenchWindow;
-	activeWorkbenchWindow = EclipseUIUtils.getActiveWorkbenchWindow();
+	/**
+	 * {@link Inherited}
+	 */
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IWorkbenchWindow activeWorkbenchWindow;
+		activeWorkbenchWindow = EclipseUIUtils.getActiveWorkbenchWindow();
 
-	try {
+		try {
 
-	    ISelection selection = activeWorkbenchWindow.getSelectionService()
-		    .getSelection();
+			ISelection selection = activeWorkbenchWindow.getSelectionService()
+					.getSelection();
 
-	    ICompilationUnit result = null;
-	    IMockClassGenerator mockClassGenerator = Activator.getDefault()
-		    .getExtensionHandler().getMockClassGenerator();
+			ICompilationUnit result = null;
+			IMockClassGenerator mockClassGenerator = Activator.getDefault()
+					.getExtensionHandler().getMockClassGenerator();
 
-	    if (selection instanceof IStructuredSelection) {
-		result = mockClassGenerator.generate(activeWorkbenchWindow,
-			(IStructuredSelection) selection);
-	    } else {
-		IEditorInput editorInput = EclipseUIUtils.getEditorInput();
+			if (selection instanceof IStructuredSelection) {
+				result = mockClassGenerator.generate(activeWorkbenchWindow,
+						(IStructuredSelection) selection);
+			} else {
+				IEditorInput editorInput = EclipseUIUtils.getEditorInput();
 
-		if (editorInput instanceof IFileEditorInput) {
-		    result = mockClassGenerator.generate(activeWorkbenchWindow,
-			    (IFileEditorInput) editorInput);
+				if (editorInput instanceof IFileEditorInput) {
+					result = mockClassGenerator.generate(activeWorkbenchWindow,
+							(IFileEditorInput) editorInput);
+				}
+			}
+
+			if (result != null) {
+				// make source beautiful
+				IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
+						.getActivePart().getSite();
+				EclipseUIUtils.organizeImports(site, result);
+				EclipseUIUtils.format(site, result);
+
+				String information = Messages.General_information;
+				MessageDialog.openInformation(activeWorkbenchWindow.getShell(),
+						information,
+						Messages.General_info_generation_successful);
+			}
+		} catch (JUTWarning e) {
+			handleWarning(e);
+		} catch (Exception e) {
+			handleError(e);
+			return null;
 		}
-	    }
 
-	    if (result != null) {
-		// make source beautiful
-		IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
-			.getActivePart().getSite();
-		EclipseUIUtils.organizeImports(site, result);
-		EclipseUIUtils.format(site, result);
-
-		String information = Messages.General_information;
-		MessageDialog.openInformation(activeWorkbenchWindow.getShell(),
-			information,
-			Messages.General_info_generation_successful);
-	    }
-	} catch (JUTWarning e) {
-	    handleWarning(e);
-	} catch (Exception e) {
-	    handleError(e);
-	    return null;
+		return null;
 	}
-
-	return null;
-    }
 
 }

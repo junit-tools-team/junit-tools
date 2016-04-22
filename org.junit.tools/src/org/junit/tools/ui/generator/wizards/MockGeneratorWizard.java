@@ -23,6 +23,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.junit.tools.base.JUTWarning;
 import org.junit.tools.base.MethodRef;
+import org.junit.tools.generator.model.JUTElements;
 import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
 import org.junit.tools.preferences.JUTPreferences;
@@ -65,10 +66,24 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 	}
 
 	public void init() throws CoreException, JUTWarning {
+		
+		IJavaProject project;
+		IJavaProject testProject = null;
 
-		// get mock project
-		IJavaProject project = JDTUtils.getProject(JUTPreferences
-				.getMockProject());
+		// if source test project is available, use this project for mock-classes
+		if (JUTPreferences.isMockSaveInTestProject() && !classToMock.isReadOnly()) {
+			JUTElements jutElements = JUTElements.initJUTElements(classToMock.getJavaProject());
+			testProject = jutElements.getProjects().getTestProject();
+		}
+		
+		if (testProject != null && testProject.exists()) {
+			project = testProject;
+		}
+		else {
+			// get default mock project
+			project = JDTUtils.getProject(JUTPreferences
+					.getMockProject());
+		}
 
 		if (project == null) {
 			project = JDTUtils.createProject(JUTPreferences.getMockProject(),

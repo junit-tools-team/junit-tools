@@ -44,6 +44,8 @@ public class JUTPreferenceInitializer extends AbstractPreferenceInitializer
 		DEFAULT_METHOD_FILTER_MODIFIER);
 
 	store.setDefault(MOCK_PROJECT, "org.junit.tools.mock");
+	
+	store.setDefault(MOCK_SAVE_IN_TESTPROJECT, true);
 
 	store.setDefault(TEST_CLASS_ANNOTATIONS, "");
 	

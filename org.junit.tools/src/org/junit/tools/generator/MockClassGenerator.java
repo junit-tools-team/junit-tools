@@ -199,7 +199,7 @@ public class MockClassGenerator implements IMockClassGenerator,
 	}
 
 	public ICompilationUnit regenerate(final ICompilationUnit oldMockClass,
-			final ICompilationUnit baseClass,
+			final IJavaElement baseClass,
 			final Vector<IMethod> mockMethodsToCreate) throws CoreException {
 
 		IWorkspaceRunnable iWorkspaceRunnable = new IWorkspaceRunnable() {
@@ -218,8 +218,17 @@ public class MockClassGenerator implements IMockClassGenerator,
 						JDTUtils.getPackage(oldMockClass));
 
 				createMockMethods(baseClass, cuMock, mockMethodsToCreate);
-
+				
 				save(cuMock);
+				
+				if (cuMock != null && cuMock.exists()) {
+					IWorkbenchWindow activeWorkbenchWindow = EclipseUIUtils.getActiveWorkbenchWindow();		
+					// make source beautiful
+					IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
+							.getActivePart().getSite();
+					EclipseUIUtils.organizeImports(site, cuMock);
+					EclipseUIUtils.format(site, cuMock);
+				}
 			}
 
 		};
@@ -603,7 +612,12 @@ public class MockClassGenerator implements IMockClassGenerator,
 			}
 		}
 
-		regenerate(cu, mockedClass.getCompilationUnit(), mockMethodsToCreate);
+		IJavaElement mockClassElement = mockedClass.getCompilationUnit();
+		if (mockClassElement == null) {
+			mockClassElement = mockedClass.getClassFile();
+		}
+		
+		regenerate(cu, mockClassElement, mockMethodsToCreate);
 	}
 
 	private IType findMockedClass(ICompilationUnit mockClass)
