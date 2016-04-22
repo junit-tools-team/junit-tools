@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.junit.tools.base.JUTException;
 import org.junit.tools.base.JUTWarning;
 
 /**
@@ -15,10 +16,10 @@ import org.junit.tools.base.JUTWarning;
  */
 public interface IMockClassGenerator {
     public ICompilationUnit generate(IWorkbenchWindow activeWorkbenchWindow,
-	    IFileEditorInput fileEditorInput) throws JUTWarning, CoreException;
+	    IFileEditorInput fileEditorInput) throws JUTWarning, CoreException, JUTException;
 
     public ICompilationUnit generate(IWorkbenchWindow activeWorkbenchWindow,
-	    IStructuredSelection selection) throws JUTWarning, CoreException;
+	    IStructuredSelection selection) throws JUTWarning, CoreException, JUTException;
 
-    public void cleanMock(ICompilationUnit cu) throws CoreException;
+    public void cleanMock(ICompilationUnit cu) throws CoreException, JUTException, JUTWarning;
 }

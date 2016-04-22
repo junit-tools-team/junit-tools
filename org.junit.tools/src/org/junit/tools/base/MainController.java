@@ -52,621 +52,621 @@ import org.junit.tools.ui.utils.EclipseUIUtils;
  */
 public class MainController implements IGeneratorConstants {
 
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    private ICompilationUnit generatedTestClass = null;
+	private ICompilationUnit generatedTestClass = null;
 
-    private boolean warning = false;
+	private boolean warning = false;
 
-    private JUTWarning warningException;
+	private JUTWarning warningException;
 
-    private boolean error = false;
+	private boolean error = false;
 
-    private Exception errorException;
+	private Exception errorException;
 
-    private int methodsCounter = 0;
+	private int methodsCounter = 0;
 
-    private ExtensionPointHandler extensionHandler = null;
+	private ExtensionPointHandler extensionHandler = null;
 
-    /**
-     * Generates a test-class.
-     * 
-     * @param activeWorkbenchWindow
-     * @param selection
-     * @return true, if the test-class is successful generated. False otherwise.
-     * @throws JUTException
-     * @throws JUTWarning
-     * @throws CoreException
-     */
-    public boolean generateTestclass(IWorkbenchWindow activeWorkbenchWindow,
-	    IStructuredSelection selection) throws JUTException, JUTWarning,
-	    CoreException {
-	JUTElements jutElements = detectJUTElements(selection, null);
-	return generateTestclass(activeWorkbenchWindow, jutElements);
-    }
-
-    /**
-     * Generates a test-class.
-     * 
-     * @param activeWorkbenchWindow
-     * @param fileEditorInput
-     * @return true, if the test-class is successful generated. False otherwise.
-     * @throws JUTException
-     * @throws JUTWarning
-     * @throws CoreException
-     */
-    public boolean generateTestclass(IWorkbenchWindow activeWorkbenchWindow,
-	    IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
-	    CoreException {
-	JUTElements jutElements = detectJUTElements(null, fileEditorInput);
-	return generateTestclass(activeWorkbenchWindow, jutElements);
-    }
-
-    protected ExtensionPointHandler getExtensionHandler() {
-	if (extensionHandler == null) {
-	    extensionHandler = Activator.getDefault().getExtensionHandler();
+	/**
+	 * Generates a test-class.
+	 * 
+	 * @param activeWorkbenchWindow
+	 * @param selection
+	 * @return true, if the test-class is successful generated. False otherwise.
+	 * @throws JUTException
+	 * @throws JUTWarning
+	 * @throws CoreException
+	 */
+	public boolean generateTestclass(IWorkbenchWindow activeWorkbenchWindow,
+			IStructuredSelection selection) throws JUTException, JUTWarning,
+			CoreException {
+		JUTElements jutElements = detectJUTElements(selection, null);
+		return generateTestclass(activeWorkbenchWindow, jutElements);
 	}
 
-	return extensionHandler;
-    }
-
-    /**
-     * Generates a test-class.
-     * 
-     * @param activeWorkbenchWindow
-     * @param jutElements
-     * @return true, if the test-class is successful generated. False otherwise.
-     * @throws JUTException
-     * @throws JUTWarning
-     */
-    protected boolean generateTestclass(
-	    final IWorkbenchWindow activeWorkbenchWindow,
-	    JUTElements jutElements) throws JUTException, JUTWarning {
-	if (jutElements == null) {
-	    throw new JUTWarning(
-		    "No elements found! Perhaps baseclass changed.");
+	/**
+	 * Generates a test-class.
+	 * 
+	 * @param activeWorkbenchWindow
+	 * @param fileEditorInput
+	 * @return true, if the test-class is successful generated. False otherwise.
+	 * @throws JUTException
+	 * @throws JUTWarning
+	 * @throws CoreException
+	 */
+	public boolean generateTestclass(IWorkbenchWindow activeWorkbenchWindow,
+			IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
+			CoreException {
+		JUTElements jutElements = detectJUTElements(null, fileEditorInput);
+		return generateTestclass(activeWorkbenchWindow, jutElements);
 	}
 
-	JUTProjects projects = jutElements.getProjects();
-	if (projects == null) {
-	    throw new JUTWarning("No project found! Perhaps baseclass changed.");
+	protected ExtensionPointHandler getExtensionHandler() {
+		if (extensionHandler == null) {
+			extensionHandler = Activator.getDefault().getExtensionHandler();
+		}
+
+		return extensionHandler;
 	}
 
-	try {
-	    JUTClassesAndPackages classesAndPackages = jutElements
-		    .getClassesAndPackages();
-	    String testClassName = classesAndPackages.getTestClassName();
-	    ICompilationUnit testClass = classesAndPackages.getTestClass();
+	/**
+	 * Generates a test-class.
+	 * 
+	 * @param activeWorkbenchWindow
+	 * @param jutElements
+	 * @return true, if the test-class is successful generated. False otherwise.
+	 * @throws JUTException
+	 * @throws JUTWarning
+	 */
+	protected boolean generateTestclass(
+			final IWorkbenchWindow activeWorkbenchWindow,
+			JUTElements jutElements) throws JUTException, JUTWarning {
+		if (jutElements == null) {
+			throw new JUTWarning(
+					"No elements found! Perhaps baseclass changed.");
+		}
 
-	    Test tmlTest = null;
+		JUTProjects projects = jutElements.getProjects();
+		if (projects == null) {
+			throw new JUTWarning("No project found! Perhaps baseclass changed.");
+		}
 
-	    // create the model
-	    final GeneratorModel model = new GeneratorModel(jutElements,
-		    tmlTest);
+		try {
+			JUTClassesAndPackages classesAndPackages = jutElements
+					.getClassesAndPackages();
+			String testClassName = classesAndPackages.getTestClassName();
+			ICompilationUnit testClass = classesAndPackages.getTestClass();
 
-	    // Open wizard
-	    if (!runGeneratorWizard(model, activeWorkbenchWindow)) {
-		return false;
-	    }
+			Test tmlTest = null;
 
-	    // generate test-cases (in tml)
-	    try {
-		TestCasesGenerator tcg = new TestCasesGenerator();
-		tcg.generateTestCases(model);
-	    } catch (Exception ex) {
-		// only log the exception
-		logger.warning("Exception occured during the test-cases-generation! "
-			+ ex.getMessage());
-	    }
+			// create the model
+			final GeneratorModel model = new GeneratorModel(jutElements,
+					tmlTest);
 
-	    // save and close opened test-class-file
-	    EclipseUIUtils.saveAndCloseEditor(testClassName);
-
-	    // Generate test-elements
-	    IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
-
-		@Override
-		public void run(IProgressMonitor monitor) {
-		    try {
-			ICompilationUnit generatedClass = null;
-			for (ITestClassGenerator testClassGenerator : getExtensionHandler()
-				.getTestClassGenerators()) {
-			    generatedClass = testClassGenerator.generate(model,
-				    getExtensionHandler()
-					    .getTestDataFactories(), monitor);
+			// Open wizard
+			if (!runGeneratorWizard(model, activeWorkbenchWindow)) {
+				return false;
 			}
-			setGeneratedTestClass(generatedClass);
 
-			monitor.done();
-		    } catch (Exception e) {
-			setError(true, e);
-		    }
+			// generate test-cases (in tml)
+			try {
+				TestCasesGenerator tcg = new TestCasesGenerator();
+				tcg.generateTestCases(model);
+			} catch (Exception ex) {
+				// only log the exception
+				logger.warning("Exception occured during the test-cases-generation! "
+						+ ex.getMessage());
+			}
+
+			// save and close opened test-class-file
+			EclipseUIUtils.saveAndCloseEditor(testClassName);
+
+			// Generate test-elements
+			IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) {
+					try {
+						ICompilationUnit generatedClass = null;
+						for (ITestClassGenerator testClassGenerator : getExtensionHandler()
+								.getTestClassGenerators()) {
+							generatedClass = testClassGenerator.generate(model,
+									getExtensionHandler()
+											.getTestDataFactories(), monitor);
+						}
+						setGeneratedTestClass(generatedClass);
+
+						monitor.done();
+					} catch (Exception e) {
+						setError(true, e);
+					}
+				}
+			};
+
+			setError(false);
+			try {
+				activeWorkbenchWindow.run(true, true, runnableWithProgress);
+			} catch (Exception ex) {
+				throw new JUTException(ex);
+			}
+
+			if (isError()) {
+				throw new JUTException(errorException);
+			}
+
+			// make source beautiful
+			IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
+					.getActivePart().getSite();
+			EclipseUIUtils.organizeImports(site, testClass);
+			EclipseUIUtils.format(site, testClass);
+
+			// generate test-suites
+			Settings settings = model.getTmlTest().getSettings();
+			ArrayList<ICompilationUnit> generateTestSuites = null;
+			if (settings != null) {
+				if (settings.isTestsuites()) {
+					generateTestSuites = generateTestSuites(jutElements);
+				}
+			} else {
+				generateTestSuites(jutElements);
+			}
+
+			if (generateTestSuites != null) {
+				// make source beautiful
+				for (ICompilationUnit cu : generateTestSuites) {
+
+					EclipseUIUtils.organizeImports(site, cu);
+				}
+				EclipseUIUtils
+						.format(site,
+								generateTestSuites
+										.toArray(new ICompilationUnit[generateTestSuites
+												.size()]));
+			}
+
+			// open in editor
+			openInEditor(activeWorkbenchWindow.getShell(),
+					(IFile) getGeneratedTestClass().getResource());
+
+		} catch (JUTException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw new JUTException(ex);
 		}
-	    };
 
-	    setError(false);
-	    try {
-		activeWorkbenchWindow.run(true, true, runnableWithProgress);
-	    } catch (Exception ex) {
-		throw new JUTException(ex);
-	    }
+		return true;
+	}
 
-	    if (isError()) {
-		throw new JUTException(errorException);
-	    }
+	protected void setError(boolean error, Exception ex) {
+		setError(error);
+		this.errorException = ex;
+	}
 
-	    // make source beautiful
-	    IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
-		    .getActivePart().getSite();
-	    EclipseUIUtils.organizeImports(site, testClass);
-	    EclipseUIUtils.format(site, testClass);
+	/**
+	 * Generates the test-suites
+	 * 
+	 * @param jutElements
+	 * @return
+	 * @throws CoreException
+	 * @throws JUTWarning
+	 */
+	protected ArrayList<ICompilationUnit> generateTestSuites(
+			JUTElements jutElements) throws CoreException, JUTWarning {
 
-	    // generate test-suites
-	    Settings settings = model.getTmlTest().getSettings();
-	    ArrayList<ICompilationUnit> generateTestSuites = null;
-	    if (settings != null) {
-		if (settings.isTestsuites()) {
-		    generateTestSuites = generateTestSuites(jutElements);
+		for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
+				.getExtensionHandler().getTestSuitesGenerators()) {
+			testSuitesGenerator.generateTestSuites(jutElements);
+			return testSuitesGenerator.getGeneratedTestSuites();
 		}
-	    } else {
-		generateTestSuites(jutElements);
-	    }
 
-	    if (generateTestSuites != null) {
-		// make source beautiful
-		for (ICompilationUnit cu : generateTestSuites) {
+		return new ArrayList<ICompilationUnit>();
+	}
 
-		    EclipseUIUtils.organizeImports(site, cu);
+	private ICompilationUnit getGeneratedTestClass() {
+		return this.generatedTestClass;
+	}
+
+	protected void setGeneratedTestClass(ICompilationUnit generatedClass) {
+		this.generatedTestClass = generatedClass;
+	}
+
+	protected void openInEditor(Shell shell, IFile generatedTestclass) {
+		EclipseUIUtils.openInEditor(shell, generatedTestclass);
+	}
+
+	private JUTElements detectJUTElements(ISelection selection)
+			throws JUTException, JUTWarning, CoreException {
+		if (selection instanceof IStructuredSelection) {
+			return detectJUTElements((IStructuredSelection) selection, null);
+		} else if (selection instanceof IFileEditorInput) {
+			return detectJUTElements(null, (IFileEditorInput) selection);
 		}
-		EclipseUIUtils
-			.format(site,
-				generateTestSuites
-					.toArray(new ICompilationUnit[generateTestSuites
-						.size()]));
-	    }
 
-	    // open in editor
-	    openInEditor(activeWorkbenchWindow.getShell(),
-		    (IFile) getGeneratedTestClass().getResource());
-
-	} catch (JUTException ex) {
-	    throw ex;
-	} catch (Exception ex) {
-	    throw new JUTException(ex);
+		return null;
 	}
 
-	return true;
-    }
+	/**
+	 * @throws CoreException
+	 * @throws JavaModelException
+	 *             Detects all the necessary JUT-Elements: project, package and
+	 *             class for the base and test.
+	 * @return detected JUT-Elements
+	 * @throws JUTException
+	 * @throws JUTWarning
+	 * @throws
+	 */
+	private JUTElements detectJUTElements(IStructuredSelection selection,
+			IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
+			CoreException {
 
-    protected void setError(boolean error, Exception ex) {
-	setError(error);
-	this.errorException = ex;
-    }
+		JUTElements jutElements = new JUTElements();
 
-    /**
-     * Generates the test-suites
-     * 
-     * @param jutElements
-     * @return
-     * @throws CoreException
-     * @throws JUTWarning 
-     */
-    protected ArrayList<ICompilationUnit> generateTestSuites(
-	    JUTElements jutElements) throws CoreException, JUTWarning {
+		// get active editor if nothing selected
+		if ((selection == null || selection.isEmpty())
+				&& fileEditorInput == null) {
+			IEditorInput editorInput = EclipseUIUtils.getEditorInput();
 
-	for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
-		.getExtensionHandler().getTestSuitesGenerators()) {
-	    testSuitesGenerator.generateTestSuites(jutElements);
-	    return testSuitesGenerator.getGeneratedTestSuites();
-	}
+			if (editorInput != null && editorInput instanceof IFileEditorInput) {
+				fileEditorInput = (IFileEditorInput) editorInput;
+			} else {
+				throw new JUTWarning(Messages.General_warning_nothing_selected);
+			}
+		}
 
-	return new ArrayList<ICompilationUnit>();
-    }
+		// get JUT-Elements
+		IJavaProject project = JDTUtils.getProject(selection, fileEditorInput);
 
-    private ICompilationUnit getGeneratedTestClass() {
-	return this.generatedTestClass;
-    }
+		if (project == null || !project.exists()) {
+			throw new JUTWarning(Messages.General_warning_nothing_selected);
+		}
 
-    protected void setGeneratedTestClass(ICompilationUnit generatedClass) {
-	this.generatedTestClass = generatedClass;
-    }
+		Vector<IJavaElement> elements = JDTUtils.getCompilationUnits(selection,
+				fileEditorInput);
 
-    protected void openInEditor(Shell shell, IFile generatedTestclass) {
-	EclipseUIUtils.openInEditor(shell, generatedTestclass);
-    }
+		Vector<ICompilationUnit> cuList;
+		cuList = new Vector<ICompilationUnit>();
 
-    private JUTElements detectJUTElements(ISelection selection)
-	    throws JUTException, JUTWarning, CoreException {
-	if (selection instanceof IStructuredSelection) {
-	    return detectJUTElements((IStructuredSelection) selection, null);
-	} else if (selection instanceof IFileEditorInput) {
-	    return detectJUTElements(null, (IFileEditorInput) selection);
-	}
+		for (IJavaElement element : elements) {
+			if (element instanceof ICompilationUnit) {
+				cuList.add((ICompilationUnit) element);
+			}
+		}
 
-	return null;
-    }
+		if (cuList.size() > 0) {
+			// init projects with cu
+			jutElements.initProjects(project, cuList.firstElement());
 
-    /**
-     * @throws CoreException
-     * @throws JavaModelException
-     *             Detects all the necessary JUT-Elements: project, package and
-     *             class for the base and test.
-     * @return detected JUT-Elements
-     * @throws JUTException
-     * @throws JUTWarning
-     * @throws
-     */
-    private JUTElements detectJUTElements(IStructuredSelection selection,
-	    IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
-	    CoreException {
+			jutElements.initClassesAndPackages(cuList);
 
-	JUTElements jutElements = new JUTElements();
+			if (!jutElements.getClassesAndPackages().getBaseClass().exists()) {
+				return jutElements;
+			}
 
-	// get active editor if nothing selected
-	if ((selection == null || selection.isEmpty())
-		&& fileEditorInput == null) {
-	    IEditorInput editorInput = EclipseUIUtils.getEditorInput();
+			// base-class constructors and methods
+			jutElements
+					.setConstructorsAndMethods(getConstructorsAndMethods(jutElements
+							.getClassesAndPackages().getBaseClass()));
 
-	    if (editorInput != null && editorInput instanceof IFileEditorInput) {
-		fileEditorInput = (IFileEditorInput) editorInput;
-	    } else {
-		throw new JUTWarning(Messages.General_warning_nothing_selected);
-	    }
-	}
+			// set selected method
+			IMethod selectedMethod = null;
 
-	// get JUT-Elements
-	IJavaProject project = JDTUtils.getProject(selection, fileEditorInput);
+			if (selection != null) {
+				Object firstElement = selection.getFirstElement();
 
-	if (project == null || !project.exists()) {
-	    throw new JUTWarning(Messages.General_warning_nothing_selected);
-	}
+				if (firstElement != null && firstElement instanceof IMethod) {
+					selectedMethod = (IMethod) firstElement;
+				}
+			} else if (fileEditorInput != null) {
+				selectedMethod = JDTUtils.getSelectedMethod(fileEditorInput);
+			}
 
-	Vector<IJavaElement> elements = JDTUtils.getCompilationUnits(selection,
-		fileEditorInput);
+			jutElements.getConstructorsAndMethods().setSelectedMethod(
+					selectedMethod);
 
-	Vector<ICompilationUnit> cuList;
-	cuList = new Vector<ICompilationUnit>();
+		} else {
+			// init projects without cu
+			jutElements.initProjects(project);
+		}
 
-	for (IJavaElement element : elements) {
-	    if (element instanceof ICompilationUnit) {
-		cuList.add((ICompilationUnit) element);
-	    }
-	}
-
-	if (cuList.size() > 0) {
-	    // init projects with cu
-	    jutElements.initProjects(project, cuList.firstElement());
-
-	    jutElements.initClassesAndPackages(cuList);
-
-	    if (!jutElements.getClassesAndPackages().getBaseClass().exists()) {
 		return jutElements;
-	    }
-
-	    // base-class constructors and methods
-	    jutElements
-		    .setConstructorsAndMethods(getConstructorsAndMethods(jutElements
-			    .getClassesAndPackages().getBaseClass()));
-
-	    // set selected method
-	    IMethod selectedMethod = null;
-
-	    if (selection != null) {
-		Object firstElement = selection.getFirstElement();
-
-		if (firstElement != null && firstElement instanceof IMethod) {
-		    selectedMethod = (IMethod) firstElement;
-		}
-	    } else if (fileEditorInput != null) {
-		selectedMethod = JDTUtils.getSelectedMethod(fileEditorInput);
-	    }
-
-	    jutElements.getConstructorsAndMethods().setSelectedMethod(
-		    selectedMethod);
-
-	} else {
-	    // init projects without cu
-	    jutElements.initProjects(project);
 	}
 
-	return jutElements;
-    }
+	private JUTConstructorsAndMethods getConstructorsAndMethods(
+			ICompilationUnit baseclass) {
 
-    private JUTConstructorsAndMethods getConstructorsAndMethods(
-	    ICompilationUnit baseclass) {
+		Vector<IMethod> baseclassConstructors = new Vector<IMethod>();
+		Vector<IMethod> baseclassMethods = new Vector<IMethod>();
 
-	Vector<IMethod> baseclassConstructors = new Vector<IMethod>();
-	Vector<IMethod> baseclassMethods = new Vector<IMethod>();
-
-	try {
-	    for (IType type : baseclass.getTypes()) {
-		for (IMethod method : type.getMethods()) {
-		    if (method.isConstructor())
-			baseclassConstructors.add(method);
-		    else
-			baseclassMethods.add(method);
-		}
-	    }
-	} catch (JavaModelException e) {
-	    throw new RuntimeException(e);
-	}
-
-	JUTConstructorsAndMethods constructorsAndMethods = new JUTConstructorsAndMethods();
-	constructorsAndMethods.setBaseClassConstructors(baseclassConstructors);
-	constructorsAndMethods.setBaseClassMethods(baseclassMethods);
-
-	return constructorsAndMethods;
-    }
-
-    /**
-     * Runs the generator-wizard.
-     * 
-     * @param model
-     * @param workbenchPart
-     * @return boolean true
-     */
-    protected boolean runGeneratorWizard(GeneratorModel model,
-	    IWorkbenchWindow workbenchPart) {
-
-	GeneratorWizard wizard = new GeneratorWizard(model);
-
-	WizardDialog dialog = new WizardDialog(workbenchPart.getShell(), wizard);
-	dialog.create();
-
-	wizard.initPages();
-
-	dialog.open();
-
-	if (wizard.isFinished()) {
-	    return true;
-	}
-
-	return false;
-    }
-
-    /**
-     * Indicates if an error occurred.
-     * 
-     * @return true if an error occurred
-     */
-    public boolean isError() {
-	return error;
-    }
-
-    /**
-     * Sets the error-flag.
-     * 
-     * @param error
-     */
-    public void setError(boolean error) {
-	this.error = error;
-    }
-
-    public boolean generateTestSuites(IWorkbenchWindow activeWorkbenchWindow,
-	    IJavaProject testProject) throws CoreException, JUTWarning {
-	if (testProject == null) {
-	    return false;
-	}
-
-	String testProjectPostfix = JUTPreferences.getTestProjectPostfix();
-
-	String testProjectName = testProject.getElementName();
-
-	if (!testProjectName.endsWith(testProjectPostfix)) {
-	    throw new JUTWarning("Select a test-project!");
-	}
-
-	for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
-		.getExtensionHandler().getTestSuitesGenerators()) {
-	    if (!testSuitesGenerator.generateTestSuites(testProject)) {
-		return false;
-	    } else {
-		// make source beautiful
-		IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
-			.getActivePart().getSite();
-
-		for (ICompilationUnit cu : testSuitesGenerator
-			.getGeneratedTestSuites()) {
-		    EclipseUIUtils.organizeImports(site, cu);
-		}
-		EclipseUIUtils.format(
-			site,
-			testSuitesGenerator.getGeneratedTestSuites().toArray(
-				new ICompilationUnit[testSuitesGenerator
-					.getGeneratedTestSuites().size()]));
-
-	    }
-	}
-
-	return true;
-    }
-
-    /**
-     * switches between test-class and test-subject
-     * 
-     * @throws CoreException
-     */
-    public boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
-	    IStructuredSelection selection) throws JUTException, JUTWarning,
-	    CoreException {
-	JUTElements uTMElements = detectJUTElements(selection, null);
-	if (uTMElements == null) {
-	    return false;
-	}
-
-	return switchClass(activeWorkbenchWindow, uTMElements);
-    }
-
-    /**
-     * switches between test-class and test-subject
-     * 
-     * @throws CoreException
-     */
-    public boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
-	    IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
-	    CoreException {
-	JUTElements uTMElements = detectJUTElements(null, fileEditorInput);
-	if (uTMElements == null) {
-	    return false;
-	}
-	return switchClass(activeWorkbenchWindow, uTMElements);
-    }
-
-    private boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
-	    JUTElements jutElements) throws JUTException, JUTWarning,
-	    JavaModelException {
-	JUTConstructorsAndMethods constructorsAndMethods = jutElements
-		.getConstructorsAndMethods();
-	if (constructorsAndMethods == null) {
-	    throw new JUTWarning(
-		    "No constructors and methods were found! Perhaps the preferences are wrong or some manual changes were done which are not compatible. "
-			    + "Elsewise create an issue or contact the JUnit-Tools-Team.");
-	}
-
-	IMethod selectedMethod = jutElements.getConstructorsAndMethods()
-		.getSelectedMethod();
-	JUTProjects projects = jutElements.getProjects();
-	JUTClassesAndPackages classesAndPackages = jutElements
-		.getClassesAndPackages();
-	ICompilationUnit classToOpen;
-	Shell shell = activeWorkbenchWindow.getShell();
-
-	MethodRef mr = null;
-	if (projects.isBaseProjectSelected()) {
-	    classToOpen = classesAndPackages.getTestClass();
-
-	    if (selectedMethod != null) {
-		mr = new MethodRef(
-			GeneratorUtils.createTestMethodName(selectedMethod
-				.getElementName()),
-			selectedMethod.getSignature());
-	    }
-	} else {
-	    classToOpen = classesAndPackages.getBaseClass();
-
-	    if (selectedMethod != null) {
-		mr = GeneratorUtils.getMethodRef(selectedMethod);
-	    }
-	}
-
-	if (classToOpen != null && classToOpen.exists()) {
-	    EclipseUIUtils.openInEditor(shell,
-		    (IFile) classToOpen.getResource());
-
-	    if (selectedMethod != null) {
-		EclipseUIUtils.selectMethodInEditor(mr);
-	    }
-
-	    return true;
-	} else {
-	    if (projects.isBaseProjectSelected()) {
-		boolean result = MessageDialog
-			.openConfirm(
-				shell,
-				"Generate new test-class?",
-				"No existing test-class found (perhaps the configuration is wrong). Would you like to generate a new test-class?");
-
-		if (result) {
-		    generateTestclass(activeWorkbenchWindow, jutElements);
-		}
-	    } else {
-		return false;
-	    }
-	}
-
-	return true;
-    }
-
-    public void createReport(IWorkbenchWindow workbenchWindow,
-	    final ISelection selection) throws JUTException, JUTWarning,
-	    CoreException {
-	setError(false);
-	setWarning(null);
-
-	IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
-
-	    @Override
-	    public void run(IProgressMonitor monitor) {
 		try {
-		    JUTElements jutElements = detectJUTElements(selection);
-		    if (jutElements == null) {
-			setWarning(new JUTWarning(
-				Messages.GeneratorUtils_SelectionNotSupported));
-			return;
-		    }
-
-		    ReportCreator rc = new ReportCreator();
-		    rc.createNecessaryTestclassesReport(jutElements, monitor);
-		    monitor.done();
-		} catch (Exception e) {
-		    setError(true, e);
+			for (IType type : baseclass.getTypes()) {
+				for (IMethod method : type.getMethods()) {
+					if (method.isConstructor())
+						baseclassConstructors.add(method);
+					else
+						baseclassMethods.add(method);
+				}
+			}
+		} catch (JavaModelException e) {
+			throw new RuntimeException(e);
 		}
-	    }
-	};
 
-	try {
-	    workbenchWindow.run(true, true, runnableWithProgress);
-	} catch (Exception ex) {
-	    throw new JUTException(ex);
+		JUTConstructorsAndMethods constructorsAndMethods = new JUTConstructorsAndMethods();
+		constructorsAndMethods.setBaseClassConstructors(baseclassConstructors);
+		constructorsAndMethods.setBaseClassMethods(baseclassMethods);
+
+		return constructorsAndMethods;
 	}
 
-	if (isWarning()) {
-	    throw warningException;
-	} else if (isError()) {
-	    throw new JUTException(errorException);
+	/**
+	 * Runs the generator-wizard.
+	 * 
+	 * @param model
+	 * @param workbenchPart
+	 * @return boolean true
+	 */
+	protected boolean runGeneratorWizard(GeneratorModel model,
+			IWorkbenchWindow workbenchPart) {
+
+		GeneratorWizard wizard = new GeneratorWizard(model);
+
+		WizardDialog dialog = new WizardDialog(workbenchPart.getShell(), wizard);
+		dialog.create();
+
+		wizard.initPages();
+
+		dialog.open();
+
+		if (wizard.isFinished()) {
+			return true;
+		}
+
+		return false;
 	}
 
-    }
-
-    protected void setWarning(JUTWarning jutWarning) {
-	warningException = jutWarning;
-
-	if (jutWarning == null) {
-	    warning = false;
-	} else {
-	    warning = true;
+	/**
+	 * Indicates if an error occurred.
+	 * 
+	 * @return true if an error occurred
+	 */
+	public boolean isError() {
+		return error;
 	}
-    }
 
-    private boolean isWarning() {
-	return warning;
-    }
+	/**
+	 * Sets the error-flag.
+	 * 
+	 * @param error
+	 */
+	public void setError(boolean error) {
+		this.error = error;
+	}
 
-    public int countAllTestMethods(final IWorkbenchWindow workbenchWindow,
-	    final IStructuredSelection selection) throws JUTException {
-	IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
+	public boolean generateTestSuites(IWorkbenchWindow activeWorkbenchWindow,
+			IJavaProject testProject) throws CoreException, JUTWarning {
+		if (testProject == null) {
+			return false;
+		}
 
-	    @Override
-	    public void run(IProgressMonitor monitor) {
+		String testProjectPostfix = JUTPreferences.getTestProjectPostfix();
+
+		String testProjectName = testProject.getElementName();
+
+		if (!testProjectName.endsWith(testProjectPostfix)) {
+			throw new JUTWarning("Select a test-project!");
+		}
+
+		for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
+				.getExtensionHandler().getTestSuitesGenerators()) {
+			if (!testSuitesGenerator.generateTestSuites(testProject)) {
+				return false;
+			} else {
+				// make source beautiful
+				IWorkbenchPartSite site = activeWorkbenchWindow.getActivePage()
+						.getActivePart().getSite();
+
+				for (ICompilationUnit cu : testSuitesGenerator
+						.getGeneratedTestSuites()) {
+					EclipseUIUtils.organizeImports(site, cu);
+				}
+				EclipseUIUtils.format(
+						site,
+						testSuitesGenerator.getGeneratedTestSuites().toArray(
+								new ICompilationUnit[testSuitesGenerator
+										.getGeneratedTestSuites().size()]));
+
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * switches between test-class and test-subject
+	 * 
+	 * @throws CoreException
+	 */
+	public boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
+			IStructuredSelection selection) throws JUTException, JUTWarning,
+			CoreException {
+		JUTElements jutElements = detectJUTElements(selection, null);
+		if (jutElements == null) {
+			return false;
+		}
+
+		return switchClass(activeWorkbenchWindow, jutElements);
+	}
+
+	/**
+	 * switches between test-class and test-subject
+	 * 
+	 * @throws CoreException
+	 */
+	public boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
+			IFileEditorInput fileEditorInput) throws JUTException, JUTWarning,
+			CoreException {
+		JUTElements jutElements = detectJUTElements(null, fileEditorInput);
+		if (jutElements == null) {
+			return false;
+		}
+		return switchClass(activeWorkbenchWindow, jutElements);
+	}
+
+	private boolean switchClass(IWorkbenchWindow activeWorkbenchWindow,
+			JUTElements jutElements) throws JUTException, JUTWarning,
+			JavaModelException {
+		JUTConstructorsAndMethods constructorsAndMethods = jutElements
+				.getConstructorsAndMethods();
+		if (constructorsAndMethods == null) {
+			throw new JUTWarning(
+					"No constructors and methods were found! Perhaps the preferences are wrong or some manual changes were done which are not compatible. "
+							+ "Elsewise create an issue or contact the JUnit-Tools-Team.");
+		}
+
+		IMethod selectedMethod = jutElements.getConstructorsAndMethods()
+				.getSelectedMethod();
+		JUTProjects projects = jutElements.getProjects();
+		JUTClassesAndPackages classesAndPackages = jutElements
+				.getClassesAndPackages();
+		ICompilationUnit classToOpen;
+		Shell shell = activeWorkbenchWindow.getShell();
+
+		MethodRef mr = null;
+		if (projects.isBaseProjectSelected()) {
+			classToOpen = classesAndPackages.getTestClass();
+
+			if (selectedMethod != null) {
+				mr = new MethodRef(
+						GeneratorUtils.createTestMethodName(selectedMethod
+								.getElementName()),
+						selectedMethod.getSignature());
+			}
+		} else {
+			classToOpen = classesAndPackages.getBaseClass();
+
+			if (selectedMethod != null) {
+				mr = GeneratorUtils.getMethodRef(selectedMethod);
+			}
+		}
+
+		if (classToOpen != null && classToOpen.exists()) {
+			EclipseUIUtils.openInEditor(shell,
+					(IFile) classToOpen.getResource());
+
+			if (selectedMethod != null) {
+				EclipseUIUtils.selectMethodInEditor(mr);
+			}
+
+			return true;
+		} else {
+			if (projects.isBaseProjectSelected()) {
+				boolean result = MessageDialog
+						.openConfirm(
+								shell,
+								"Generate new test-class?",
+								"No existing test-class found (perhaps the configuration is wrong). Would you like to generate a new test-class?");
+
+				if (result) {
+					generateTestclass(activeWorkbenchWindow, jutElements);
+				}
+			} else {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public void createReport(IWorkbenchWindow workbenchWindow,
+			final ISelection selection) throws JUTException, JUTWarning,
+			CoreException {
+		setError(false);
+		setWarning(null);
+
+		IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
+
+			@Override
+			public void run(IProgressMonitor monitor) {
+				try {
+					JUTElements jutElements = detectJUTElements(selection);
+					if (jutElements == null) {
+						setWarning(new JUTWarning(
+								Messages.GeneratorUtils_SelectionNotSupported));
+						return;
+					}
+
+					ReportCreator rc = new ReportCreator();
+					rc.createNecessaryTestclassesReport(jutElements, monitor);
+					monitor.done();
+				} catch (Exception e) {
+					setError(true, e);
+				}
+			}
+		};
+
 		try {
-		    setError(false);
-		    JUTElements jutElements = detectJUTElements(selection, null);
-		    ReportCreator rc = new ReportCreator();
-		    int methodsCounter = rc.countAllTestMethods(jutElements,
-			    monitor);
-		    setMethodsCounter(methodsCounter);
-		    monitor.done();
-		} catch (Exception e) {
-		    setError(true, e);
+			workbenchWindow.run(true, true, runnableWithProgress);
+		} catch (Exception ex) {
+			throw new JUTException(ex);
 		}
-	    }
-	};
 
-	try {
-	    workbenchWindow.run(true, true, runnableWithProgress);
-	} catch (Exception ex) {
-	    throw new JUTException(ex);
+		if (isWarning()) {
+			throw warningException;
+		} else if (isError()) {
+			throw new JUTException(errorException);
+		}
+
 	}
 
-	if (isError()) {
-	    throw new JUTException(errorException);
+	protected void setWarning(JUTWarning jutWarning) {
+		warningException = jutWarning;
+
+		if (jutWarning == null) {
+			warning = false;
+		} else {
+			warning = true;
+		}
 	}
 
-	return this.methodsCounter;
-    }
+	private boolean isWarning() {
+		return warning;
+	}
 
-    protected void setMethodsCounter(int methodsCounter) {
-	this.methodsCounter = methodsCounter;
-    }
+	public int countAllTestMethods(final IWorkbenchWindow workbenchWindow,
+			final IStructuredSelection selection) throws JUTException {
+		IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
+
+			@Override
+			public void run(IProgressMonitor monitor) {
+				try {
+					setError(false);
+					JUTElements jutElements = detectJUTElements(selection, null);
+					ReportCreator rc = new ReportCreator();
+					int methodsCounter = rc.countAllTestMethods(jutElements,
+							monitor);
+					setMethodsCounter(methodsCounter);
+					monitor.done();
+				} catch (Exception e) {
+					setError(true, e);
+				}
+			}
+		};
+
+		try {
+			workbenchWindow.run(true, true, runnableWithProgress);
+		} catch (Exception ex) {
+			throw new JUTException(ex);
+		}
+
+		if (isError()) {
+			throw new JUTException(errorException);
+		}
+
+		return this.methodsCounter;
+	}
+
+	protected void setMethodsCounter(int methodsCounter) {
+		this.methodsCounter = methodsCounter;
+	}
 
 }

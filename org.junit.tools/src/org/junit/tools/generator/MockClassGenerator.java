@@ -25,8 +25,10 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.junit.tools.base.JUTException;
 import org.junit.tools.base.JUTWarning;
 import org.junit.tools.base.MethodRef;
+import org.junit.tools.generator.model.JUTElements;
 import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
 import org.junit.tools.preferences.JUTPreferences;
@@ -52,7 +54,7 @@ public class MockClassGenerator implements IMockClassGenerator,
 	@Override
 	public ICompilationUnit generate(IWorkbenchWindow activeWorkbenchWindow,
 			IFileEditorInput fileEditorInput) throws JUTWarning,
-			JavaModelException, CoreException {
+			JavaModelException, CoreException, JUTException {
 		return generate(JDTUtils.getJavaElements(null, fileEditorInput),
 				activeWorkbenchWindow);
 	}
@@ -60,7 +62,7 @@ public class MockClassGenerator implements IMockClassGenerator,
 	@Override
 	public ICompilationUnit generate(IWorkbenchWindow activeWorkbenchWindow,
 			IStructuredSelection selection) throws JUTWarning,
-			JavaModelException, CoreException {
+			JavaModelException, CoreException, JUTException {
 		Vector<IJavaElement> javaElements = JDTUtils.getJavaElements(selection,
 				null, true);
 
@@ -69,7 +71,7 @@ public class MockClassGenerator implements IMockClassGenerator,
 
 	private ICompilationUnit generate(Vector<IJavaElement> javaElements,
 			IWorkbenchWindow activeWorkbenchWindow) throws CoreException,
-			JUTWarning {
+			JUTWarning, JUTException {
 		if (javaElements.size() == 0) {
 			return null;
 		}
@@ -550,7 +552,7 @@ public class MockClassGenerator implements IMockClassGenerator,
 		return wizard;
 	}
 
-	public void cleanMock(ICompilationUnit cu) throws CoreException {
+	public void cleanMock(ICompilationUnit cu) throws CoreException, JUTException, JUTWarning {
 		// make a rebuild
 		IType mockedClass = findMockedClass(cu);
 		if (mockedClass == null) {
@@ -621,7 +623,7 @@ public class MockClassGenerator implements IMockClassGenerator,
 	}
 
 	private IType findMockedClass(ICompilationUnit mockClass)
-			throws JavaModelException {
+			throws JavaModelException, JUTException, JUTWarning {
 		IType type = mockClass.findPrimaryType();
 
 		if (type == null || !type.exists()) {
@@ -631,26 +633,25 @@ public class MockClassGenerator implements IMockClassGenerator,
 		String mockedClassName = null;
 
 		// mocked name via superclass
-		String superclassName = type.getSuperclassName();
-		if (superclassName != null && superclassName.indexOf("MockUp<") > -1) {
-			int ixStart = superclassName.indexOf("<") + 1;
-			int ixEnd = superclassName.indexOf(">");
-
-			mockedClassName = superclassName.substring(ixStart, ixEnd);
-		}
-
-		// mocked name via name conventions
+		mockedClassName = GeneratorUtils.getMockedClassName(type);
+		
+		// check if it is a test-class
 		if (mockedClassName == null) {
-			String elementName = type.getElementName();
-			// TODO mock-postfix
-			if (elementName.endsWith("Mock")) {
-				int endIndex = elementName.indexOf("Mock");
-				mockedClassName = elementName.substring(0, endIndex);
+			boolean isTestclass = GeneratorUtils.isTestClass(type);
+			if (isTestclass) {
+				// initialize the JUT elements to get the base class
+				try {
+					JUTElements jutElements = JUTElements.initJUTElements(type.getJavaProject(), type.getCompilationUnit());
+					return jutElements.getClassesAndPackages().getBaseClass().findPrimaryType();
+				} catch (Exception e) {
+					throw new JUTException("A test-class was selected to generate a mock-class and the base-class could not be resolved!");
+				}
+				
 			}
 		}
 
 		if (mockedClassName == null) {
-			return null;
+			throw new JUTWarning("The class to mock was not found!");
 		}
 
 		String fullQualifiedName = JDTUtils.getFullQualifiedName(
