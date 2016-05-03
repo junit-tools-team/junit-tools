@@ -752,6 +752,9 @@ public class GeneratorUtils implements IGeneratorConstants {
 				int endIndex = elementName.indexOf("Mock");
 				mockedClassName = elementName.substring(0, endIndex);
 			}
+			else {
+				mockedClassName = elementName;
+			}
 		}
 		
 		return mockedClassName;
