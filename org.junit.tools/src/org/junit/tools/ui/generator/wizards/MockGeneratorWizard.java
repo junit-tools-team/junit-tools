@@ -71,9 +71,14 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 		IJavaProject testProject = null;
 
 		// if source test project is available, use this project for mock-classes
-		if (JUTPreferences.isMockSaveInTestProject() && !classToMock.isReadOnly()) {
-			JUTElements jutElements = JUTElements.initJUTElements(classToMock.getJavaProject());
-			testProject = jutElements.getProjects().getTestProject();
+		if (JUTPreferences.isMockSaveInTestProject()) {
+			try {
+				JUTElements jutElements = JUTElements.initJUTElements(classToMock.getJavaProject());
+				testProject = jutElements.getProjects().getTestProject();
+			}
+			catch (Exception ex) {
+				// nothing -> use default mock project as target
+			}
 		}
 		
 		if (testProject != null && testProject.exists()) {
