@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.ui.preferences.ProjectSelectionDialog;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.FormatAllAction;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -222,22 +223,44 @@ public class EclipseUIUtils {
 
 			IWorkbenchPage page = PlatformUI.getWorkbench()
 				.getActiveWorkbenchWindow().getActivePage();
-			ITextEditor editor = (ITextEditor) page
-				.getActiveEditor();
+
+			IEditorPart activeEditor = page.getActiveEditor();
+			if (activeEditor == null || !(activeEditor instanceof ITextEditor)) {
+				return;
+			}
+			
+			ITextEditor editor = (ITextEditor)activeEditor; 
+
 			ITypeRoot typeRoot = JavaUI
 				.getEditorInputTypeRoot(editor.getEditorInput());
 			ICompilationUnit icu = (ICompilationUnit) typeRoot
 				.getAdapter(ICompilationUnit.class);
+			
 			IType type = icu.findPrimaryType();
 			IMethod method = null;
+			
 			try {
 			    method = GeneratorUtils.findMethod(
 				    Arrays.asList(type.getMethods()), methodRef);
+			    
+			    if (method != null) {
+			    	// get the already selected method in the editor
+			    	// if it is the same method, select nothing
+			    	ISelection selection = editor.getSelectionProvider().getSelection();
+			    	if (selection != null && selection instanceof ITextSelection) {
+			    		ITextSelection txtSelection = (ITextSelection)selection;
+			    		IJavaElement selectedElement = typeRoot.getElementAt(txtSelection.getOffset());
+			    		if (selectedElement != null && selectedElement.equals(method)) {
+			    			return;
+			    		}
+			    	}
+			    }
 			} catch (JavaModelException e1) {
 			    // not found
 			    return;
 			}
 
+			// select method
 			IJavaElement element = method;
 			JavaUI.revealInEditor(editor, element);
 		    }
