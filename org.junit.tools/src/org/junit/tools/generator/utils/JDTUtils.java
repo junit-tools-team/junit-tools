@@ -532,20 +532,23 @@ public class JDTUtils implements IGeneratorConstants {
 		
 		// create source folder
 		IFolder sourceFolder = project.getFolder("src");
-		sourceFolder.create(false, true, null);
+		if (!sourceFolder.exists()) {
+			sourceFolder.create(false, true, null);	
 
-		// add source folder to class path
-		try {
-			IPackageFragmentRoot rootPckg = javaProject.getPackageFragmentRoot(sourceFolder);
-			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
-			IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length + 1];
-			System.arraycopy(oldEntries, 0, newEntries, 0, oldEntries.length);
-			newEntries[oldEntries.length] = JavaCore.newSourceEntry(rootPckg.getPath());
-			javaProject.setRawClasspath(newEntries, null);			
+			// add source folder to class path
+			try {
+				IPackageFragmentRoot rootPckg = javaProject.getPackageFragmentRoot(sourceFolder);
+				IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
+				IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length + 1];
+				System.arraycopy(oldEntries, 0, newEntries, 0, oldEntries.length);
+				newEntries[oldEntries.length] = JavaCore.newSourceEntry(rootPckg.getPath());
+				javaProject.setRawClasspath(newEntries, null);			
+			}
+			catch (Exception e) {
+				// nothing
+			}
 		}
-		catch (Exception e) {
-			// nothing
-		}
+
  
 		if (baseProject != null) {
 			description.setNatureIds(baseProject.getProject().getDescription()
