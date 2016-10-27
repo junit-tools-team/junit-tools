@@ -86,7 +86,7 @@ public class MockClassGenerator implements IMockClassGenerator,
 				iJavaElement = mockedClass.getParent();
 			}
 		}
-
+		
 		MockGeneratorWizard wizard = openWizard(iJavaElement,
 				activeWorkbenchWindow);
 		if (!wizard.isFinished()) {

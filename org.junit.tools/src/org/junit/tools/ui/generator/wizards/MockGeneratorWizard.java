@@ -112,8 +112,17 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 
 			// get target package
 			IPackageFragment pckg = JDTUtils.getPackage(classToMock);
+			
+			String pckgName = pckg.getElementName();
+			if (pckgName == null || "".equals(pckgName)) {
+				pckgName = "mock";
+			}
+			else {
+				pckgName = pckg.getElementName() + ".mock";	
+			}
+			
 			this.targetPackage = JDTUtils.getPackage(project,
-					pckg.getElementName() + ".mock", false);
+					pckgName, false);
 
 			// get mock class
 			if (targetPackage != null && targetPackage.exists()) {
