@@ -695,6 +695,10 @@ public class GeneratorUtils implements IGeneratorConstants {
 	 * @return true if it is a test-class
 	 */
 	public static boolean isTestClass(IType type) {
+		if (type == null) {
+			return false;
+		}
+		
 		String elementName = type.getElementName();
 		
 		String projectPostfix = JUTPreferences.getTestProjectPostfix();

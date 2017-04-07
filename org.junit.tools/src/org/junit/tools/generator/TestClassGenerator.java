@@ -170,7 +170,9 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
 	// create the test-source-folder and -package
 	IPackageFragment testPackage = model.getJUTElements().getClassesAndPackages().getTestPackage();
 
-	testClass.createPackageDeclaration(testPackage.getElementName(), null);
+	if (!testPackage.isDefaultPackage()) {
+		testClass.createPackageDeclaration(testPackage.getElementName(), null);
+	}
 
 	// create static standard-imports
 	createStandardStaticImports(testClass);

@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
@@ -15,6 +16,7 @@ import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
 import org.junit.tools.Activator;
 import org.junit.tools.generator.ITestSuitesGenerator;
 import org.junit.tools.generator.model.JUTElements;
+import org.junit.tools.generator.utils.GeneratorUtils;
 import org.junit.tools.generator.utils.JDTUtils;
 
 public class DeleteTestElements extends DeleteParticipant {
@@ -96,6 +98,13 @@ public class DeleteTestElements extends DeleteParticipant {
 				// nothing to do
 				return null;
 			    }
+			}
+			
+			if (!utmElements.getProjects().isBaseProjectSelected() && utmElements.getProjects()
+					.isTestProjectFound()) {
+				if (!GeneratorUtils.isTestClass(deletedCu.findPrimaryType())) {
+					return null;
+				}
 			}
 
 			// actualize the test-suites
