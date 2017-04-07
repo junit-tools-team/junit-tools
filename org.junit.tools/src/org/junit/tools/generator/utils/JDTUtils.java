@@ -1109,7 +1109,7 @@ public class JDTUtils implements IGeneratorConstants {
 		if (cu != null) {
 			imports = cu.getImports();
 		} else {
-			ASTParser parser = ASTParser.newParser(AST.JLS4);
+			ASTParser parser = ASTParser.newParser(AST.JLS8);
 			parser.setSource(type.getClassFile().getBuffer().getCharacters());
 			CompilationUnit cuParsed = (CompilationUnit) parser.createAST(null);
 

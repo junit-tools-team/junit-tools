@@ -1,7 +1,6 @@
 package org.junit.tools.ui.generator.wizards;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.jdt.core.ICompilationUnit;

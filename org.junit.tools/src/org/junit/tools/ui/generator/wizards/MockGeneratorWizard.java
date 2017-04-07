@@ -190,7 +190,6 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 		List<IJavaProject> javaProjects = JDTUtils.getJavaProjects();
 		Set<IJavaProject> setProjects = new HashSet<IJavaProject>(javaProjects);
 
-		@SuppressWarnings("restriction")
 		ProjectSelectionDialog dialog = new ProjectSelectionDialog(getShell(),
 				setProjects);
 
