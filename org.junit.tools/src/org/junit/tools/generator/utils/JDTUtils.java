@@ -353,14 +353,35 @@ public class JDTUtils implements IGeneratorConstants {
 
 		return getPackage(javaProject, name, folder, createIfNotExists);
 	}
+	
+	public static boolean existsClassPathEntry(IJavaProject project, IPath path) throws JavaModelException {
+
+		for (IClasspathEntry classpath : project.getRawClasspath()) {
+			if (classpath.getPath().equals(path) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static void addClassPathEntry(IJavaProject project, IPath path) {
+		
+	}
 
 	public static IPackageFragmentRoot createSourceFolder(
 			IJavaProject javaProject, IPath folderPath) throws CoreException,
 			JUTWarning {
 		IFolder folder = javaProject.getProject().getFolder(folderPath);
-
+		
 		if (!folder.exists()) {
 			return createSourceFolder(javaProject, folder);
+		}
+		else {
+			IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
+			
+			if (!existsClassPathEntry(javaProject, root.getPath())) {
+				addPathToClasspath(javaProject, root.getPath());	
+			}
 		}
 
 		return javaProject.getPackageFragmentRoot(folder);
@@ -410,13 +431,16 @@ public class JDTUtils implements IGeneratorConstants {
 
 		// add new folder to class path
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
+		addPathToClasspath(javaProject, root.getPath());
+		return root;
+	}
+
+	private static void addPathToClasspath(IJavaProject javaProject, IPath path) throws JavaModelException {
 		IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
 		IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length + 1];
-		System.arraycopy(oldEntries, 0, newEntries, 0, oldEntries.length);
-		newEntries[oldEntries.length] = JavaCore.newSourceEntry(root.getPath());
+		System.arraycopy(oldEntries, 0, newEntries, 1, oldEntries.length);
+		newEntries[0] = JavaCore.newSourceEntry(path);
 		javaProject.setRawClasspath(newEntries, null);
-
-		return root;
 	}
 
 	public static IPackageFragment getPackage(IJavaProject javaProject,

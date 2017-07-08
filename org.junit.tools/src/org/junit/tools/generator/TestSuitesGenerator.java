@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAnnotation;
@@ -181,10 +182,9 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 
 			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
-				String testSourceFolderName = JUTPreferences.getTestSourceFolderName();
-
+				
 				for (IPackageFragmentRoot fragmentRoot : testProject.getPackageFragmentRoots()) {
-					if (testSourceFolderName.equals(fragmentRoot.getPath().lastSegment())) {
+					if (fragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
 						generateTestSuites(monitor, fragmentRoot);
 					}
 				}

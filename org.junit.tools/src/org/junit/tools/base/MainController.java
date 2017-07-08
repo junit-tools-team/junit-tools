@@ -455,7 +455,7 @@ public class MainController implements IGeneratorConstants {
 		if (!testProjectName.endsWith(testProjectPostfix)) {
 			throw new JUTWarning("Select a test-project!");
 		}
-
+		
 		for (ITestSuitesGenerator testSuitesGenerator : Activator.getDefault()
 				.getExtensionHandler().getTestSuitesGenerators()) {
 			if (!testSuitesGenerator.generateTestSuites(testProject)) {

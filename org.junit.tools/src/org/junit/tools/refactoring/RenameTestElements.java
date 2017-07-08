@@ -137,8 +137,8 @@ public class RenameTestElements extends RenameParticipant {
 			    IPackageFragment newBasePackage = JDTUtils
 				    .getPackage(
 					    oldBasePackage.getJavaProject(),
-					    JUTPreferences
-						    .getTestSourceFolderName(),
+					    utmElementsOld
+						.getClassesAndPackages().getTestFolder(),
 					    getArguments().getNewName(), false);
 			    JUTElements utmElementsNew = JUTElements
 				    .initJUTElements(

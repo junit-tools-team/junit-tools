@@ -66,9 +66,10 @@ public class MoveTestElements extends MoveParticipant {
 		    if (testCu.exists()) {
 			IJavaProject testProject = utmElements.getProjects()
 				.getTestProject();
+			
 			IPackageFragment newTestPackage = JDTUtils.getPackage(
 				testProject,
-				JUTPreferences.getTestSourceFolderName(),
+				classesAndPackages.getTestFolder(),
 				newPackage.getElementName(), true);
 
 			testCu.move(newTestPackage, null, null, true, pm2);
