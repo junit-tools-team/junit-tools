@@ -204,7 +204,7 @@ public class TestSuitesGenerator implements ITestSuitesGenerator {
 
 					if (javaElement instanceof IPackageFragment) {
 						IPackageFragment pf = (IPackageFragment) javaElement;
-						if (pf.getKind() == IPackageFragmentRoot.K_SOURCE) {
+						if (!pf.getElementName().endsWith(".mock")) {
 
 							if (pf.getElementName().equals(pf.getJavaProject().getElementName() + ".all")) {
 								baseTestSuitePackage = pf;

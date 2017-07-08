@@ -57,7 +57,10 @@ public class CleanMocksHandler extends JUTHandler {
 
 		for (IJavaElement element : elements) {
 			if (element instanceof ICompilationUnit) {
-				mockClassGenerator.cleanMock((ICompilationUnit) element);
+				if (element.getElementName().indexOf("TestSuite") == -1
+				&&	element.getElementName().endsWith("Mock.java")
+				&&  JDTUtils.getPackage(element).getElementName().endsWith(".mock")) 
+					mockClassGenerator.cleanMock((ICompilationUnit) element);
 			}
 		}
 

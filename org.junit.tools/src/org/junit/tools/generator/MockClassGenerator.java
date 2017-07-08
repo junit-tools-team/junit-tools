@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -131,22 +132,17 @@ public class MockClassGenerator implements IMockClassGenerator,
 				logger.log(Level.INFO,
 						"generate mock for " + cu.getElementName() + " in "
 								+ targetProject.getElementName());
-
+				
 				if (targetPackageTmp == null) {
 					return;
 				}
 
-				IPackageFragment targetPackage;
-
+				IPackageFragment targetPackage = null;
 				if (!targetPackageTmp.exists()) {
-					try {
-						targetPackage = JDTUtils.createPackage(targetProject,
-								targetPackageTmp.getElementName());
-					} catch (JUTWarning e) {
-						setJUTWarning(e);
-						return;
-					}
-				} else {
+					IPackageFragmentRoot targetSourceFolder = JDTUtils.getPackageFragmentRoot(targetPackageTmp);
+					targetPackage = JDTUtils.getPackage(targetProject, targetSourceFolder, targetPackageTmp.getElementName(), true);
+				}
+				else {
 					targetPackage = targetPackageTmp;
 				}
 

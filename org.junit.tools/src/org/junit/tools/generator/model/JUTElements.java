@@ -9,7 +9,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -781,7 +780,7 @@ public class JUTElements {
 		return baseSourceFolders;
 	}
 
-	private IPackageFragmentRoot getTestSourceFolder(IJavaProject testProject, IPackageFragment basePackage)
+	public static IPackageFragmentRoot getTestSourceFolder(IJavaProject testProject, IPackageFragment basePackage)
 			throws CoreException, JUTWarning {
 		IJavaElement parent = basePackage.getParent();
 		IPackageFragmentRoot baseRoot = null;

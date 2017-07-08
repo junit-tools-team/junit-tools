@@ -314,6 +314,7 @@ public class JDTUtils implements IGeneratorConstants {
 		return folder;
 	}
 
+	@Deprecated
 	public static IPackageFragment getPackage(IJavaProject javaProject,
 			String name, boolean createIfNotExists) throws CoreException,
 			JUTWarning {
@@ -695,6 +696,17 @@ public class JDTUtils implements IGeneratorConstants {
 
 		return (IPackageFragment) tmp;
 	}
+	
+	
+	public static IPackageFragmentRoot getPackageFragmentRoot(IJavaElement javaElement) {
+		IJavaElement tmp = javaElement
+				.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+
+		if (tmp == null)
+			return null;
+
+		return (IPackageFragmentRoot) tmp;
+	}	
 
 	/**
 	 * Creates a method.
@@ -1215,7 +1227,7 @@ public class JDTUtils implements IGeneratorConstants {
 	 * @return the created AST-parser
 	 */
 	private static ASTParser createASTParser(ICompilationUnit cu) {
-		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setProject(cu.getJavaProject());
 		parser.setUnitName(cu.getElementName());
 		parser.setResolveBindings(true);

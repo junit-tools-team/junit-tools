@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.ui.preferences.ProjectSelectionDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -81,6 +82,7 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 			}
 		}
 		
+		boolean isDefaultMockProject = false;
 		if (testProject != null && testProject.exists()) {
 			project = testProject;
 		}
@@ -88,11 +90,13 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 			// get default mock project
 			project = JDTUtils.getProject(JUTPreferences
 					.getMockProject());
-		}
 
-		if (project == null) {
-			project = JDTUtils.createProject(JUTPreferences.getMockProject(),
-					classToMock.getJavaProject());
+			if (project == null || !project.exists()) {
+				project = JDTUtils.createProject(JUTPreferences.getMockProject(),
+						classToMock.getJavaProject());
+			}		
+			
+			isDefaultMockProject = true;
 		}
 
 		methodSelection = new GroupMethodSelectionCtrl();
@@ -121,8 +125,14 @@ public class MockGeneratorWizard extends Wizard implements INewWizard,
 				pckgName = pckg.getElementName() + ".mock";	
 			}
 			
-			this.targetPackage = JDTUtils.getPackage(project,
-					pckgName, false);
+			if (isDefaultMockProject) {
+				this.targetPackage = JDTUtils.getPackage(project, "", pckgName, false);	
+			}
+			else {
+				IPackageFragmentRoot testSourceFolder = JUTElements.getTestSourceFolder(testProject, JDTUtils.getPackage(classToMock));		
+				this.targetPackage = JDTUtils.getPackage(project, testSourceFolder,
+						pckgName, false);				
+			}
 
 			// get mock class
 			if (targetPackage != null && targetPackage.exists()) {
