@@ -8,7 +8,7 @@ import org.junit.tools.base.ExtensionPointHandler;
 /**
  * Initializer for the junit-tools-preference-values.
  * 
- * @author JUnit-Tools-Team
+ * @author Robert Streng
  */
 public class JUTPreferenceInitializer extends AbstractPreferenceInitializer
 	implements IJUTPreferenceConstants {
@@ -46,6 +46,8 @@ public class JUTPreferenceInitializer extends AbstractPreferenceInitializer
 	store.setDefault(MOCK_PROJECT, "org.junit.tools.mock");
 	
 	store.setDefault(MOCK_SAVE_IN_TESTPROJECT, true);
+	
+	store.setDefault(MOCK_SAVE_IN_TESTPROJECT, "powermock");
 
 	store.setDefault(TEST_CLASS_ANNOTATIONS, "");
 	

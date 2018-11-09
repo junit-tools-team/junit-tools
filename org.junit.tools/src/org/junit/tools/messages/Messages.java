@@ -5,7 +5,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * Messages for JUnit-Tools.
  * 
- * @author JUnit-Tools-Team
+ * @author Robert Streng
  * 
  */
 public class Messages extends NLS {
@@ -150,6 +150,7 @@ public class Messages extends NLS {
     public static String JUTPreferenceMainPage_TML_container;
     public static String JUTPreferenceMainPage_Mock_Project;
     public static String JUTPreferenceMainPage_Mock_Save_In_Test_Project;
+    public static String JUTPreferenceMainPage_Mock_Framework;
 
     public static String GeneratorWizard_description_main;
     public static String GeneratorWizard_description_testbases;

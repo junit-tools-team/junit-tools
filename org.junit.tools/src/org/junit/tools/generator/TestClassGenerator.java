@@ -54,7 +54,7 @@ import org.junit.tools.preferences.JUTPreferences;
  * The default test-class java generator. On the base of the TML the test-class
  * will be generated.
  * 
- * @author JUnit-Tools-Team
+ * @author Robert Streng
  * 
  */
 @SuppressWarnings("restriction")
@@ -1000,8 +1000,6 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
 	    // create parameter list for private call
 	    paramNameList = createParamNameList(params, true);
 
-	    // method-call with mock-framework-call (JMockit and
-	    // Deencapsulation)
 	    if (paramNameList.length() > 0) {
 		paramNameList = ", new Object[]{" + paramNameList + "}";
 	    }
@@ -1010,13 +1008,16 @@ public class TestClassGenerator implements ITestClassGenerator, IGeneratorConsta
 		baseName += ".class";
 	    }
 
-	    // TODO check if powermock or jmockit
-	    // sbTestMethodBody.append("Whitebox.invokeMethod(").append(baseName).append(",
-	    // ").append(QUOTES)
-	    // .append(methodName).append(QUOTES).append(paramValueList).append(");");
-
-	    sbTestMethodBody.append("Deencapsulation.invoke(").append(baseName).append(", ").append(QUOTES)
-		    .append(methodName).append(QUOTES).append(paramNameList).append(");");
+	    // check if powermock or jmockit
+	    String mockFramework = JUTPreferences.getMockFramework();
+	    if (mockFramework == null || mockFramework == "powermock") {
+		    	sbTestMethodBody.append("Whitebox.invokeMethod(").append(baseName).append(",").append(QUOTES)
+		    	.append(methodName).append(QUOTES).append(paramNameList).append(");");	    	
+	    }
+	    else {
+		    sbTestMethodBody.append("Deencapsulation.invoke(").append(baseName).append(", ").append(QUOTES)
+			    .append(methodName).append(QUOTES).append(paramNameList).append(");");	    	
+	    }
 
 	}
     }

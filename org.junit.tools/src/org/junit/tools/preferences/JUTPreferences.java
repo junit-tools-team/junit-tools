@@ -12,7 +12,7 @@ import org.junit.tools.Activator;
 /**
  * Preference-class for the junit-tools-processing.
  * 
- * @author JUnit-Tools-Team
+ * @author Robert Streng
  * 
  */
 public class JUTPreferences implements IJUTPreferenceConstants {
@@ -42,6 +42,8 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 	
 	private static Boolean mockSaveInTestProject = null;
 
+	private static String mockFramework = null;
+	
 	// from annotations-page
 	private static String[] testClassAnnotations = null;
 
@@ -291,10 +293,18 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 		JUTPreferences.mockProject = mockProject;
 	}
 	
+	public static String getMockFramework() {
+		return mockFramework;
+	}
+	
 	public static void setMockSaveInTestProject(Boolean mockSaveInTestProject) {
 		JUTPreferences.mockSaveInTestProject = mockSaveInTestProject;
 	}
-
+	
+	public static void setMockFramework(String mockFramework) {
+		JUTPreferences.mockFramework= mockFramework;
+	}
+	
 	/**
 	 * Converter for lists
 	 * 
@@ -375,6 +385,9 @@ public class JUTPreferences implements IJUTPreferenceConstants {
 						} else if (event.getProperty() == MOCK_SAVE_IN_TESTPROJECT) {
 							setMockSaveInTestProject((Boolean) event.getNewValue());
 							return;
+						} else if (event.getProperty() == MOCK_FRAMEWORK) {
+							setMockFramework((String) event.getNewValue());
+							return;							
 						} else if (event.getProperty() == TEST_CLASS_ANNOTATIONS) {
 							setTestClassAnnotations(convert((String) event
 									.getNewValue()));

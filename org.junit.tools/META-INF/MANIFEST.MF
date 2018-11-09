@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.junit.tools
 Bundle-SymbolicName: org.junit.tools;singleton:=true
-Bundle-Version: 1.0.6.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: org.junit.tools.Activator
 Require-Bundle: org.eclipse.ui;visibility:=reexport,
  org.eclipse.core.runtime;visibility:=reexport,

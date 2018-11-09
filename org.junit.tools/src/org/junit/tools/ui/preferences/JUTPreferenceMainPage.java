@@ -2,6 +2,7 @@ package org.junit.tools.ui.preferences;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -18,7 +19,7 @@ import org.junit.tools.preferences.IJUTPreferenceConstants;
 /**
  * The page for the main preferences.
  * 
- * @author JUnit-Tools-Team
+ * @author Robert Streng
  * 
  */
 public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
@@ -261,7 +262,12 @@ public class JUTPreferenceMainPage extends FieldEditorPreferencePage implements
 				getFieldEditorParent()));
 
 		addBlankLine();
-
+		
+		// mock framework
+		addField(new RadioGroupFieldEditor(MOCK_FRAMEWORK, Messages.JUTPreferenceMainPage_Mock_Framework, 1,
+				new String[][] { { "PowerMock (EasyMock/Mockito)", "powermock" }, { "JMockit (until version 1.34)", "jmockit" } }, getFieldEditorParent(),
+				true));
+		
 		adjustGridLayout();
 	}
 
